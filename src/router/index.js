@@ -7,10 +7,6 @@ Vue.use(Router)
 import Layout from '@/views/layout/Layout'
 
 /* Router Modules */
-import componentsRouter from './modules/components'
-import chartsRouter from './modules/charts'
-import tableRouter from './modules/table'
-import nestedRouter from './modules/nested'
 
 /** note: Submenu only appear when children.length>=1
  *  detail see  https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -76,28 +72,83 @@ export const constantRouterMap = [
     ]
   },
   {
-    path: '/documentation',
+    path: '/campaign',
     component: Layout,
-    redirect: '/documentation/index',
+    redirect: '/campaign',
+    alwaysShow: true, // will always show the root menu
+    meta: {
+      title: 'campaign',
+      icon: 'component'
+    },
     children: [
       {
-        path: 'index',
-        component: () => import('@/views/documentation/index'),
+        path: '/campaign/campaign_list',
+        component: () => import('@/views/campaign/list.vue'),
         name: 'Documentation',
-        meta: { title: 'documentation', icon: 'documentation', noCache: true }
+        meta: { title: 'campaign_list', noCache: true }
+      },
+      {
+        path: '/campaign/access_log',
+        component: () => import('@/views/campaign/access-log.vue'),
+        name: 'Documentation',
+        meta: { title: 'access_log', noCache: true }
       }
     ]
   },
   {
-    path: '/guide',
+    path: '/offer',
     component: Layout,
-    redirect: '/guide/index',
+    redirect: '/offer',
     children: [
       {
         path: 'index',
-        component: () => import('@/views/guide/index'),
-        name: 'Guide',
-        meta: { title: 'guide', icon: 'guide', noCache: true }
+        component: () => import('@/views/offer/list.vue'),
+        name: 'offer',
+        meta: { title: 'offer', icon: 'money', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/network',
+    component: Layout,
+    redirect: '/network',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/network/list.vue'),
+        name: 'network',
+        meta: { title: 'network', icon: 'international', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/traffic',
+    component: Layout,
+    redirect: '/traffic',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/traffic/list.vue'),
+        name: 'traffic',
+        meta: { title: 'traffic', icon: 'nested', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/system',
+    component: Layout,
+    redirect: '/guide/index',
+    alwaysShow: true, // will always show the root menu
+    meta: {
+      title: 'system',
+      icon: 'setting'
+    },
+    children: [
+      {
+        path: 'account',
+        component: () => import('@/views/system/account-manage.vue'),
+        name: 'account',
+        meta: { title: 'account_manage', noCache: true }
       }
     ]
   }
@@ -110,7 +161,7 @@ export default new Router({
 })
 
 export const asyncRouterMap = [
-  {
+  /* {
     path: '/permission',
     component: Layout,
     redirect: '/permission/index',
@@ -153,7 +204,7 @@ export const asyncRouterMap = [
         meta: { title: 'icons', icon: 'icon', noCache: true }
       }
     ]
-  },
- 
+  },*/
+
   { path: '*', redirect: '/404', hidden: true }
 ]
