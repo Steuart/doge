@@ -52,6 +52,9 @@
       <el-select v-model="listQuery.type" :placeholder="$t('网络联盟')" clearable class="filter-item" style="width: 130px">
         <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key"/>
       </el-select>
+      <el-select v-model="listQuery.type" :placeholder="$t('任务')" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key"/>
+      </el-select>
       <el-date-picker
         v-model="beginDate"
         class="filter-item"

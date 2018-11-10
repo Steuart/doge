@@ -97,7 +97,7 @@ export const constantRouterMap = [
         path: '/campaign/detail',
         component: () => import('@/views/campaign/detail.vue'),
         alwaysShow: false,
-        name: 'access_log',
+        name: 'detail',
         hidden: true,
         meta: { title: '任务详情', noCache: true }
       }
@@ -119,7 +119,7 @@ export const constantRouterMap = [
         component: () => import('@/views/offer/detail.vue'),
         name: 'detail',
         hidden: true,
-        meta: { title: 'offer', noCache: true }
+        meta: { title: '任务详情', noCache: true }
       }
     ]
   },
