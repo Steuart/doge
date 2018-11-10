@@ -84,14 +84,22 @@ export const constantRouterMap = [
       {
         path: '/campaign/campaign_list',
         component: () => import('@/views/campaign/list.vue'),
-        name: 'Documentation',
+        name: 'campaign_list',
         meta: { title: 'campaign_list', noCache: true }
       },
       {
         path: '/campaign/access_log',
         component: () => import('@/views/campaign/access-log.vue'),
-        name: 'Documentation',
+        name: 'access_log',
         meta: { title: 'access_log', noCache: true }
+      },
+      {
+        path: '/campaign/detail',
+        component: () => import('@/views/campaign/detail.vue'),
+        alwaysShow: false,
+        name: 'access_log',
+        hidden: true,
+        meta: { title: '任务详情', noCache: true }
       }
     ]
   },
@@ -101,10 +109,17 @@ export const constantRouterMap = [
     redirect: '/offer',
     children: [
       {
-        path: 'index',
+        path: 'list',
         component: () => import('@/views/offer/list.vue'),
-        name: 'offer',
+        name: 'list',
         meta: { title: 'offer', icon: 'money', noCache: true }
+      },
+      {
+        path: 'detail',
+        component: () => import('@/views/offer/detail.vue'),
+        name: 'detail',
+        hidden: true,
+        meta: { title: 'offer', noCache: true }
       }
     ]
   },

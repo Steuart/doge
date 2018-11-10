@@ -1,118 +1,6 @@
 <template>
   <div class="app-container">
-    <el-table
-      v-loading="listLoading"
-      :key="tableKey"
-      :data="list"
-      border
-      fit
-      highlight-current-row
-      style="width: 100%;"
-      @sort-change="sortChange">
-      <el-table-column :label="$t('table.id')" prop="id" align="center" width="65">
-        <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('用户名')" prop="id" align="center" width="65">
-        <template slot-scope="scope">
-          <span>{{ scope.row.type }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('昵称')" sortable="custom" width="150px" align="center">
-        <template slot-scope="scope">
-          <span >{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('邮箱')">
-        <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
-          <el-tag>{{ scope.row.type | typeFilter }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('联系电话')">
-        <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
-          <el-tag>{{ scope.row.type | typeFilter }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('创建时间')" width="110px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('状态')" width="110px" align="center">
-        <template slot-scope="scope">
-          <el-tag>{{ scope.row.reviewer }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('table.actions')" align="center" width="400" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button type="primary" size="small">{{ $t('禁用') }}</el-button>
-          <el-button type="primary" size="small" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
-          <el-button type="primary" size="small" @click="updatePasswordVisible = true">{{ $t('修改密码 ') }}</el-button>
-          <el-button size="small" type="danger" @click="deleteVisible = true">{{ $t('table.delete') }}
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
-
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="700px" class="edit-dialog">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
-        <el-form-item :label="$t('昵称')" prop="title">
-          <el-input v-model="temp.title"/>
-        </el-form-item>
-        <el-form-item :label="$t('邮箱')" prop="type">
-          <el-input v-model="temp.title"/>
-        </el-form-item>
-        <el-form-item :label="$t('联系电话')" prop="type">
-          <el-input v-model="temp.title"/>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
-      </div>
-    </el-dialog>
-
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="updatePasswordVisible" width="700px" class="edit-dialog">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
-        <el-form-item :label="$t('原密码')" prop="title">
-          <el-input v-model="temp.title"/>
-        </el-form-item>
-        <el-form-item :label="$t('新密码')" prop="type">
-          <el-input v-model="temp.title"/>
-        </el-form-item>
-        <el-form-item :label="$t('确认密码')" prop="type">
-          <el-input v-model="temp.title"/>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="updatePasswordVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button type="primary" @click="updatePasswordVisible=false">{{ $t('table.confirm') }}</el-button>
-      </div>
-    </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel"/>
-        <el-table-column prop="pv" label="Pv"/>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
-      </span>
-    </el-dialog>
-
-    <el-dialog :visible.sync="deleteVisible" title="确认删除" width="30%">
-      <span>删除后将不可恢复，确认删除？</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="deleteVisible = false">取 消</el-button>
-        <el-button type="primary" @click="deleteVisible = false">确 定</el-button>
-      </span>
-    </el-dialog>
-
+    任务详情
   </div>
 </template>
 
@@ -195,7 +83,6 @@ export default {
       },
       deleteVisible: false,
       downloadLoading: false,
-      updatePasswordVisible: false,
       beginDate: '',
       endDate: ''
     }
