@@ -42,54 +42,54 @@
       <el-table-column :label="$t('名字')" prop="id" align="center" width="65">
         <template slot-scope="scope">
           <router-link to="/campaign/detail">
-            <el-tag>{{ scope.row.type }}</el-tag>
+            <el-tag>{{ scope.row.name }}</el-tag>
           </router-link>
         </template>
       </el-table-column>
       <el-table-column :label="$t('创建时间')" sortable="custom" width="150px" align="center">
         <template slot-scope="scope">
-          <span >{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+          <span >{{ scope.row.dateCreate }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('任务')">
         <template slot-scope="scope">
           <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
-          <el-tag>{{ scope.row.type | typeFilter }}</el-tag>
+          <el-tag>{{ scope.row.redirectLink }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column :label="$t('转化')" width="110px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
+          <span>{{ scope.row.leads }}</span>
         </template>
       </el-table-column>
       <el-table-column v-if="showReviewer" :label="$t('点击')" width="110px" align="center">
         <template slot-scope="scope">
-          <span style="color:red;">{{ scope.row.reviewer }}</span>
+          <span style="color:red;">{{ scope.row.clicks }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('CPC(%)')" width="80px">
         <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
+          <span>{{ scope.row.costPerClick }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('PPL(%)')" align="center" width="95">
         <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
+          <span>{{ scope.row.payPerLead }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('CVR(%)')" class-name="status-col" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
+          <span>{{ scope.row.payPerLead }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('CPC(%)')" class-name="status-col" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
+          <span>{{ scope.row.costPerClick }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('ROI(%)')" class-name="status-col" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
+          <span>{{ scope.row.clicks }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
@@ -180,7 +180,7 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
+import { pageCampaign } from '@/api/campaign'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -268,9 +268,9 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
+      pageCampaign(this.listQuery).then(response => {
+        this.list = response.data.data.list
+        this.total = response.data.data.total
 
         // Just to simulate the time of the request
         setTimeout(() => {
@@ -327,16 +327,6 @@ export default {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           this.temp.author = 'vue-element-admin'
-          createArticle(this.temp).then(() => {
-            this.list.unshift(this.temp)
-            this.dialogFormVisible = false
-            this.$notify({
-              title: '成功',
-              message: '创建成功',
-              type: 'success',
-              duration: 2000
-            })
-          })
         }
       })
     },
@@ -351,26 +341,6 @@ export default {
     },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
-            this.dialogFormVisible = false
-            this.$notify({
-              title: '成功',
-              message: '更新成功',
-              type: 'success',
-              duration: 2000
-            })
-          })
-        }
       })
     },
     handleDelete(row) {
@@ -384,10 +354,6 @@ export default {
       this.list.splice(index, 1)
     },
     handleFetchPv(pv) {
-      fetchPv(pv).then(response => {
-        this.pvData = response.data.pvData
-        this.dialogPvVisible = true
-      })
     },
     handleDownload() {
       this.downloadLoading = true

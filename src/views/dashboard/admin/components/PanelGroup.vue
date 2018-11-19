@@ -7,7 +7,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">今日转化</div>
-          <count-to :start-val="0" :end-val="102400" :duration="2600" class="card-panel-num"/>
+          <count-to :start-val="0" :end-val="data.todayTransfer" :duration="2600" class="card-panel-num"/>
         </div>
       </div>
     </el-col>
@@ -18,7 +18,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">今日收入</div>
-          <count-to :start-val="0" :end-val="81212" :duration="3000" class="card-panel-num"/>
+          <count-to :start-val="0" :end-val="data.todayEarnings" :duration="3000" class="card-panel-num"/>
         </div>
       </div>
     </el-col>
@@ -29,7 +29,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">本月收入</div>
-          <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num"/>
+          <count-to :start-val="0" :end-val="data.monthEarnings" :duration="3000" class="card-panel-num"/>
         </div>
       </div>
     </el-col>
@@ -40,7 +40,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">总收入</div>
-          <count-to :start-val="0" :end-val="13600" :duration="3600" class="card-panel-num"/>
+          <count-to :start-val="0" :end-val="data.totalEarnings" :duration="3600" class="card-panel-num"/>
         </div>
       </div>
     </el-col>
@@ -49,12 +49,28 @@
 
 <script>
 import CountTo from 'vue-count-to'
+import { defaultTransferStatistic } from '@/api/statistic'
 
 export default {
   components: {
     CountTo
   },
+  data() {
+    return {
+      data: null
+    }
+  },
+  computed: {
+  },
+  created() {
+    this.fetchData()
+  },
   methods: {
+    fetchData() {
+      defaultTransferStatistic().then(response => {
+        this.data = response.data.data
+      })
+    },
     handleSetLineChartData(type) {
       this.$emit('handleSetLineChartData', type)
     }
