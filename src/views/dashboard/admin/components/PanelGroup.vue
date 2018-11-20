@@ -68,7 +68,7 @@ export default {
   methods: {
     fetchData() {
       defaultTransferStatistic().then(response => {
-        this.data = response.data.data
+        this.data = response.data
       })
     },
     handleSetLineChartData(type) {

@@ -269,13 +269,14 @@ export default {
     getList() {
       this.listLoading = true
       pageCampaign(this.listQuery).then(response => {
-        this.list = response.data.data.list
-        this.total = response.data.data.total
+        const data = response.data
+        this.list = data.list
+        this.total = data.total
 
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
-        }, 1.5 * 1000)
+        }, 1.5 * 100)
       })
     },
     handleFilter() {
