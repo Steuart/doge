@@ -11,3 +11,13 @@ export function pageNetwork(query) {
     params: query
   })
 }
+
+/**
+ * 获取列表
+ */
+export function listNetwork() {
+  return request({
+    url: '/network/list',
+    method: 'get'
+  })
+}

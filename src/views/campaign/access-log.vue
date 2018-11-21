@@ -46,13 +46,13 @@
       </el-checkbox-group>
     </div>
     <div class="filter-container">
-      <el-select v-model="listQuery.importance" :placeholder="$t('流量平台')" clearable style="width: 130px" class="filter-item">
+      <el-select v-model="listQuery.importance" :placeholder="'流量平台'" clearable style="width: 130px" class="filter-item">
         <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item"/>
       </el-select>
-      <el-select v-model="listQuery.type" :placeholder="$t('网络联盟')" clearable class="filter-item" style="width: 130px">
+      <el-select v-model="listQuery.type" :placeholder="'网络联盟'" clearable class="filter-item" style="width: 130px">
         <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key"/>
       </el-select>
-      <el-select v-model="listQuery.type" :placeholder="$t('任务')" clearable class="filter-item" style="width: 130px">
+      <el-select v-model="listQuery.type" :placeholder="'任务'" clearable class="filter-item" style="width: 130px">
         <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key"/>
       </el-select>
       <el-date-picker
@@ -68,7 +68,7 @@
         type="date"
         placeholder="结束日期"
         style="width: 150px"/>
-      <el-input :placeholder="$t('名字')" v-model="listQuery.title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input :placeholder="'名字'" v-model="listQuery.title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" circle @click="handleFilter" />
     </div>
 
@@ -81,65 +81,65 @@
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange">
-      <el-table-column :label="$t('table.id')" prop="id" align="center" width="65">
+      <el-table-column :label="'table.id'" prop="id" align="center" width="65">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('名字')" prop="id" align="center" width="65">
+      <el-table-column :label="'名字'" prop="id" align="center" width="65">
         <template slot-scope="scope">
           <span>{{ scope.row.type }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('创建时间')" sortable="custom" width="150px" align="center">
+      <el-table-column :label="'创建时间'" sortable="custom" width="150px" align="center">
         <template slot-scope="scope">
           <span >{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('任务')">
+      <el-table-column :label="'任务'">
         <template slot-scope="scope">
           <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
           <el-tag>{{ scope.row.type | typeFilter }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('转化')" width="110px" align="center">
+      <el-table-column :label="'转化'" width="110px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.pageviews }}</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="showReviewer" :label="$t('点击')" width="110px" align="center">
+      <el-table-column v-if="showReviewer" :label="'点击'" width="110px" align="center">
         <template slot-scope="scope">
           <span style="color:red;">{{ scope.row.reviewer }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('CPC(%)')" width="80px">
+      <el-table-column :label="'CPC(%)'" width="80px">
         <template slot-scope="scope">
           <span>{{ scope.row.pageviews }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('PPL(%)')" align="center" width="95">
+      <el-table-column :label="'PPL(%)'" align="center" width="95">
         <template slot-scope="scope">
           <span>{{ scope.row.pageviews }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('CVR(%)')" class-name="status-col" width="100">
+      <el-table-column :label="'CVR(%)'" class-name="status-col" width="100">
         <template slot-scope="scope">
           <span>{{ scope.row.pageviews }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('CPC(%)')" class-name="status-col" width="100">
+      <el-table-column :label="'CPC(%)'" class-name="status-col" width="100">
         <template slot-scope="scope">
           <span>{{ scope.row.pageviews }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('ROI(%)')" class-name="status-col" width="100">
+      <el-table-column :label="'ROI(%)'" class-name="status-col" width="100">
         <template slot-scope="scope">
           <span>{{ scope.row.pageviews }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.actions')" align="center" width="100" class-name="small-padding fixed-width">
+      <el-table-column :label="'table.actions'" align="center" width="100" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" type="danger" @click="deleteVisible = true">{{ $t('table.delete') }}
+          <el-button size="mini" type="danger" @click="deleteVisible = true">{{ 'table.delete' }}
           </el-button>
         </template>
       </el-table-column>
@@ -329,17 +329,6 @@ export default {
     },
     handleDownload() {
       this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-        const data = this.formatJson(filterVal, this.list)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
-        })
-        this.downloadLoading = false
-      })
     },
     formatJson(filterVal, jsonData) {
       return jsonData.map(v => filterVal.map(j => {

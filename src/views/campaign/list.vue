@@ -1,28 +1,30 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-select v-model="listQuery.importance" :placeholder="$t('流量平台')" clearable style="width: 130px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item"/>
+      <el-select v-model="listQuery.networkId" :placeholder="'流量平台'" clearable style="width: 130px" class="filter-item">
+        <el-option v-for="item in trafficList" :key="item.id" :label="item.name" :value="item.id"/>
       </el-select>
-      <el-select v-model="listQuery.type" :placeholder="$t('网络联盟')" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key"/>
+      <el-select v-model="listQuery.trafficId" :placeholder="'网络联盟'" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in networkList" :key="item.id" :label="item.name" :value="item.id"/>
       </el-select>
       <el-date-picker
-        v-model="beginDate"
+        v-model="listQuery.beginDate"
         class="filter-item"
         type="date"
+        value-format="yyyy-MM-dd HH:mm:ss"
         placeholder="开始日期"
         style="width: 150px"/>
       <span class="filter-item">-</span>
       <el-date-picker
-        v-model="endDate"
+        v-model="listQuery.endDate"
         class="filter-item"
         type="date"
+        value-format="yyyy-MM-dd HH:mm:ss"
         placeholder="结束日期"
         style="width: 150px"/>
-      <el-input :placeholder="$t('名字')" v-model="listQuery.title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input :placeholder="'名字'" v-model="listQuery.title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" circle @click="handleFilter" />
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">{{ $t('新增') }}</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">新增</el-button>
     </div>
 
     <el-table
@@ -34,99 +36,58 @@
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange">
-      <el-table-column :label="$t('table.id')" prop="id" align="center" width="65">
-        <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('名字')" prop="id" align="center" width="65">
+      <el-table-column :label="'编号'" type="index" align="center" width="65" />
+      <el-table-column :label="'名字'" align="center" width="150">
         <template slot-scope="scope">
           <router-link to="/campaign/detail">
             <el-tag>{{ scope.row.name }}</el-tag>
           </router-link>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('创建时间')" sortable="custom" width="150px" align="center">
+      <el-table-column :label="'创建时间'" sortable="custom" property="dateCreate" width="170px" align="center" />
+      <el-table-column :label="'任务'" property="redirectLink" />
+      <el-table-column :label="'转化'" property="leads" width="110px" align="center" />
+      <el-table-column :label="'点击'" property="clicks" width="110px" align="center" />
+      <el-table-column :label="'CPC(%)'" property="costPerClick" width="110px" align="center" />
+      <el-table-column :label="'PPL(%)'" property="payPerLead" align="center" width="110px" />
+      <el-table-column :label="'CVR(%)'" property="payPerLead" class-name="status-col" width="110px" />
+      <el-table-column :label="'CPC(%)'" property="costPerClick" class-name="status-col" width="110px" />
+      <el-table-column :label="'ROI(%)'" property="clicks" class-name="status-col" width="110px" />
+      <el-table-column :label="'操作'" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <span >{{ scope.row.dateCreate }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('任务')">
-        <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
-          <el-tag>{{ scope.row.redirectLink }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('转化')" width="110px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.leads }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column v-if="showReviewer" :label="$t('点击')" width="110px" align="center">
-        <template slot-scope="scope">
-          <span style="color:red;">{{ scope.row.clicks }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('CPC(%)')" width="80px">
-        <template slot-scope="scope">
-          <span>{{ scope.row.costPerClick }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('PPL(%)')" align="center" width="95">
-        <template slot-scope="scope">
-          <span>{{ scope.row.payPerLead }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('CVR(%)')" class-name="status-col" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.payPerLead }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('CPC(%)')" class-name="status-col" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.costPerClick }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('ROI(%)')" class-name="status-col" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.clicks }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
-          <el-button size="mini" type="danger" @click="deleteVisible = true">{{ $t('table.delete') }}
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ '编辑' }}</el-button>
+          <el-button size="mini" type="danger" @click="deleteVisible = true">{{ '删除' }}
           </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNo" :limit.sync="listQuery.pageSize" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="700px" class="edit-dialog">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
-        <el-form-item :label="$t('名字')" prop="title">
+        <el-form-item :label="'名字'" prop="title">
           <el-input v-model="temp.title"/>
         </el-form-item>
-        <el-form-item :label="$t('类型')" prop="type">
+        <el-form-item :label="'类型'" prop="type">
           <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
             <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('任务')" prop="type">
+        <el-form-item :label="'任务'" prop="type">
           <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
             <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('流量平台')" prop="type">
+        <el-form-item :label="'流量平台'" prop="type">
           <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
             <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('CPC')" prop="title">
+        <el-form-item :label="'CPC'" prop="title">
           <el-input v-model="temp.title" style="width: 100%"/>
         </el-form-item>
-        <el-form-item :inline="true" :label="$t('token')" prop="title">
+        <el-form-item :inline="true" :label="'token'" prop="title">
           <el-switch v-model="temp.type" />
         </el-form-item>
         <div class="token">
@@ -153,8 +114,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确认</el-button>
       </div>
     </el-dialog>
 
@@ -164,7 +125,7 @@
         <el-table-column prop="pv" label="Pv"/>
       </el-table>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
+        <el-button type="primary" @click="dialogPvVisible = false">{{ 'table.confirm' }}</el-button>
       </span>
     </el-dialog>
 
@@ -181,6 +142,8 @@
 
 <script>
 import { pageCampaign } from '@/api/campaign'
+import { listNetwork } from '@/api/network'
+import { listTraffic } from '@/api/traffic'
 import waves from '@/directive/waves' // Waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -219,15 +182,19 @@ export default {
     return {
       tableKey: 0,
       list: null,
+      networkList: null,
+      trafficList: null,
       total: 0,
       listLoading: true,
       listQuery: {
-        page: 1,
-        limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
+        pageNo: 1,
+        pageSize: 20,
+        trafficId: null,
+        networkId: null,
+        name: null,
+        beginDate: null,
+        endDate: null,
+        sorts: null
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
@@ -264,6 +231,8 @@ export default {
   },
   created() {
     this.getList()
+    this.listNetwork()
+    this.listTraffic()
   },
   methods: {
     getList() {
@@ -277,6 +246,17 @@ export default {
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 100)
+      })
+    },
+    // 查询网络联盟列表
+    listNetwork() {
+      listNetwork().then(response => {
+        this.networkList = response.data
+      })
+    },
+    listTraffic() {
+      listTraffic().then(response => {
+        this.trafficList = response.data
       })
     },
     handleFilter() {
@@ -357,18 +337,6 @@ export default {
     handleFetchPv(pv) {
     },
     handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-        const data = this.formatJson(filterVal, this.list)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
-        })
-        this.downloadLoading = false
-      })
     },
     formatJson(filterVal, jsonData) {
       return jsonData.map(v => filterVal.map(j => {

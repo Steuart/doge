@@ -67,7 +67,7 @@ export const constantRouterMap = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
-        meta: { title: 'dashboard', icon: 'dashboard', noCache: true }
+        meta: { title: '主页', icon: 'dashboard', noCache: true }
       }
     ]
   },
@@ -77,7 +77,7 @@ export const constantRouterMap = [
     redirect: '/campaign',
     alwaysShow: true, // will always show the root menu
     meta: {
-      title: 'campaign',
+      title: '项目',
       icon: 'component'
     },
     children: [
@@ -85,13 +85,13 @@ export const constantRouterMap = [
         path: '/campaign/campaign_list',
         component: () => import('@/views/campaign/list.vue'),
         name: 'campaign_list',
-        meta: { title: 'campaign_list', noCache: true }
+        meta: { title: '项目列表', noCache: true }
       },
       {
         path: '/campaign/access_log',
         component: () => import('@/views/campaign/access-log.vue'),
         name: 'access_log',
-        meta: { title: 'access_log', noCache: true }
+        meta: { title: '访问日志', noCache: true }
       },
       {
         path: '/campaign/detail',
@@ -112,7 +112,7 @@ export const constantRouterMap = [
         path: 'list',
         component: () => import('@/views/offer/list.vue'),
         name: 'list',
-        meta: { title: 'offer', icon: 'money', noCache: true }
+        meta: { title: '任务', icon: 'money', noCache: true }
       },
       {
         path: 'detail',
@@ -132,7 +132,7 @@ export const constantRouterMap = [
         path: 'index',
         component: () => import('@/views/network/list.vue'),
         name: 'network',
-        meta: { title: 'network', icon: 'international', noCache: true }
+        meta: { title: '网络联盟', icon: 'international', noCache: true }
       }
     ]
   },
@@ -145,7 +145,7 @@ export const constantRouterMap = [
         path: 'index',
         component: () => import('@/views/traffic/list.vue'),
         name: 'traffic',
-        meta: { title: 'traffic', icon: 'nested', noCache: true }
+        meta: { title: '流量平台', icon: 'nested', noCache: true }
       }
     ]
   },
@@ -155,7 +155,7 @@ export const constantRouterMap = [
     redirect: '/guide/index',
     alwaysShow: true, // will always show the root menu
     meta: {
-      title: 'system',
+      title: '系统设置',
       icon: 'setting'
     },
     children: [
@@ -163,7 +163,7 @@ export const constantRouterMap = [
         path: 'account',
         component: () => import('@/views/system/account-manage.vue'),
         name: 'account',
-        meta: { title: 'account_manage', noCache: true }
+        meta: { title: '账号管理', noCache: true }
       }
     ]
   }
