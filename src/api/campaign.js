@@ -7,38 +7,37 @@ import request from '@/utils/request'
 export function pageCampaign(query) {
   return request({
     url: '/campaign/page',
-    method: 'get',
-    params: query
+    method: 'post',
+    data: query
   })
 }
 
-
 export function saveCampaign(data) {
-	return request({
-		url: '/campaign/page',
+  return request({
+    url: '/campaign',
     method: 'get',
-    data: query
-	})
+    data: data
+  })
 }
 
 export function getCampaign(id) {
-	return request({
-		url: '/campaign/'+id,
-		method: 'get'
-	})
+  return request({
+    url: '/campaign/' + id,
+    method: 'get'
+  })
 }
 
-export function updateCamapign(id,param){
-	return requet({
-		url: '/campaign/'+id,
-		method: 'post',
-		data: param
-	})
+export function updateCamapign(id, param) {
+  return request({
+    url: '/campaign/' + id,
+    method: 'post',
+    data: param
+  })
 }
 
-export function deleteCampaign(id){
-	return request({
-		url: '/campaign'+id,
-		method: 'delete'
-	})
+export function deleteCampaign(id) {
+  return request({
+    url: '/campaign' + id,
+    method: 'delete'
+  })
 }

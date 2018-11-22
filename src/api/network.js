@@ -1,11 +1,10 @@
 import request from '@/utils/request'
 
-
-export function getNetworkById(id){
-	return requet({
-		url: '/network/'+id,
-		method: 'get'
-	})
+export function getNetworkById(id) {
+  return request({
+    url: '/network/' + id,
+    method: 'get'
+  })
 }
 
 /**
@@ -31,30 +30,24 @@ export function listNetwork() {
 }
 
 export function sveNetwork(param) {
-	return request({
-		url: '/network'
-		method: 'put',
-		data: param
-	})
+  return request({
+    url: '/network',
+    method: 'put',
+    data: param
+  })
 }
 
 export function updateNetwork(id, param) {
-	return request({
-		url: '/network/'+id,
-		method: 'post',
-		data: param
-	})
+  return request({
+    url: '/network/' + id,
+    method: 'post',
+    data: param
+  })
 }
-
 
 export function deleteNetwork(id) {
-	return request({
-		url: '/network'+id,
-		method: 'delete'
-	})
+  return request({
+    url: '/network' + id,
+    method: 'delete'
+  })
 }
-
-
-
-
-

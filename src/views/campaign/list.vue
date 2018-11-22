@@ -46,13 +46,13 @@
       </el-table-column>
       <el-table-column :label="'创建时间'" sortable="custom" property="dateCreate" width="170px" align="center" />
       <el-table-column :label="'任务'" property="redirectLink" />
-      <el-table-column :label="'转化'" property="leads" width="110px" align="center" />
-      <el-table-column :label="'点击'" property="clicks" width="110px" align="center" />
-      <el-table-column :label="'CPC(%)'" property="costPerClick" width="110px" align="center" />
-      <el-table-column :label="'PPL(%)'" property="payPerLead" align="center" width="110px" />
-      <el-table-column :label="'CVR(%)'" property="payPerLead" class-name="status-col" width="110px" />
-      <el-table-column :label="'CPC(%)'" property="costPerClick" class-name="status-col" width="110px" />
-      <el-table-column :label="'ROI(%)'" property="clicks" class-name="status-col" width="110px" />
+      <el-table-column :label="'转化'" sortable="custom" property="leads" width="110px" align="center" />
+      <el-table-column :label="'点击'" sortable="custom" property="clicks" width="110px" align="center" />
+      <el-table-column :label="'CPC(%)'" sortable="custom" property="costPerClick" width="110px" align="center" />
+      <el-table-column :label="'PPL(%)'" sortable="custom" property="payPerLead" align="center" width="110px" />
+      <el-table-column :label="'CVR(%)'" sortable="custom" property="payPerLead" class-name="status-col" width="110px" />
+      <el-table-column :label="'CPC(%)'" sortable="custom" property="costPerClick" class-name="status-col" width="110px" />
+      <el-table-column :label="'ROI(%)'" sortable="custom" property="clicks" class-name="status-col" width="110px" />
       <el-table-column :label="'操作'" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ '编辑' }}</el-button>
@@ -67,7 +67,7 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="700px" class="edit-dialog">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
         <el-form-item :label="'名字'" prop="title">
-          <el-input v-model="temp.title"/>
+          <el-input v-model="temp.name"/>
         </el-form-item>
         <el-form-item :label="'类型'" prop="type">
           <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
@@ -80,15 +80,12 @@
           </el-select>
         </el-form-item>
         <el-form-item :label="'流量平台'" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
+          <el-select v-model="temp.trafficId" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in trafficList" :key="item.id" :label="item.name" :value="item.id"/>
           </el-select>
         </el-form-item>
         <el-form-item :label="'CPC'" prop="title">
-          <el-input v-model="temp.title" style="width: 100%"/>
-        </el-form-item>
-        <el-form-item :inline="true" :label="'token'" prop="title">
-          <el-switch v-model="temp.type" />
+          <el-input v-model="temp.costPerClick" style="width: 100%"/>
         </el-form-item>
         <div class="token">
           <el-form-item :label="'p1'">
@@ -141,7 +138,7 @@
 </template>
 
 <script>
-import { pageCampaign } from '@/api/campaign'
+import { pageCampaign, getCampaign } from '@/api/campaign'
 import { listNetwork } from '@/api/network'
 import { listTraffic } from '@/api/traffic'
 import waves from '@/directive/waves' // Waves directive
@@ -202,7 +199,9 @@ export default {
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
-        id: undefined,
+        name: null,
+        costPerClick: null,
+        trafficId: null,
         importance: 1,
         remark: '',
         timestamp: new Date(),
@@ -272,17 +271,19 @@ export default {
     },
     sortChange(data) {
       const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
+      if (prop !== null) {
+        let sortType = 'asc'
+        if (order === 'descending') {
+          sortType = 'desc'
+        } else {
+          sortType = 'asc'
+        }
+        this.listQuery.sorts = [{
+          'fieldName': prop,
+          'sortType': sortType
+        }]
       }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
+      this.getList()
     },
     resetTemp() {
       this.temp = {
@@ -312,12 +313,14 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+      const id = row.id
+      getCampaign(id).then(response => {
+        const data = response.data
+        this.temp.name = data.name
+        this.temp.costPerClick = data.costPerClick
+        this.temp.trafficId = data.trafficId
       })
     },
     updateData() {
