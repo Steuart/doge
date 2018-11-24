@@ -22,8 +22,8 @@
         value-format="yyyy-MM-dd HH:mm:ss"
         placeholder="结束日期"
         style="width: 150px"/>
-      <el-input :placeholder="'名字'" v-model="listQuery.title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" circle @click="handleFilter" />
+      <el-input :placeholder="'名字'" v-model="listQuery.name" style="width: 200px;" class="filter-item" />
+      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" circle @click="getList" />
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">新增</el-button>
     </div>
 
@@ -56,7 +56,7 @@
       <el-table-column :label="'操作'" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ '编辑' }}</el-button>
-          <el-button size="mini" type="danger" @click="deleteVisible = true">{{ '删除' }}
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ '删除' }}
           </el-button>
         </template>
       </el-table-column>
@@ -65,22 +65,22 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNo" :limit.sync="listQuery.pageSize" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="700px" class="edit-dialog">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
+      <el-form ref="dataForm" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
         <el-form-item :label="'名字'" prop="title">
           <el-input v-model="temp.name"/>
         </el-form-item>
-        <el-form-item :label="'类型'" prop="type">
+        <!--<el-form-item :label="'类型'" prop="type">
           <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
             <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
           </el-select>
-        </el-form-item>
+        </el-form-item>-->
         <el-form-item :label="'任务'" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
+          <el-select v-model="temp.offerId" class="filter-item" placeholder="请选择">
+            <el-option v-for="item in offerList" :key="item.id" :label="item.name" :value="item.id"/>
           </el-select>
         </el-form-item>
         <el-form-item :label="'流量平台'" prop="type">
-          <el-select v-model="temp.trafficId" class="filter-item" placeholder="Please select">
+          <el-select v-model="temp.trafficId" class="filter-item" placeholder="请选择" @change="listTrafficToken()" >
             <el-option v-for="item in trafficList" :key="item.id" :label="item.name" :value="item.id"/>
           </el-select>
         </el-form-item>
@@ -88,26 +88,14 @@
           <el-input v-model="temp.costPerClick" style="width: 100%"/>
         </el-form-item>
         <div class="token">
-          <el-form-item :label="'p1'">
-            <el-input v-model="temp.type"/>
-            <el-input v-model="temp.type"/>
-            <el-button style="display: inline;">删除</el-button>
-          </el-form-item>
-
-          <el-form-item :label="'p1'">
-            <el-input v-model="temp.type"/>
-            <el-input v-model="temp.type"/>
-            <el-button style="display: inline;">删除</el-button>
-          </el-form-item>
-
-          <el-form-item :label="'p1'">
-            <el-input v-model="temp.type"/>
-            <el-input v-model="temp.type"/>
-            <el-button style="display: inline;">删除</el-button>
+          <el-form-item v-for="(item, index) in temp.tokens" :key="item.id" :label="'p'+index">
+            <el-input v-model="item.name"/>
+            <el-input v-model="item.value"/>
+            <el-button style="display: inline;" @click="deleteToken(index)">删除</el-button>
           </el-form-item>
         </div>
         <el-form-item>
-          <el-button round style="width: 100%">+</el-button>
+          <el-button round style="width: 100%" @click="addToken">+</el-button>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -115,22 +103,11 @@
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确认</el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel"/>
-        <el-table-column prop="pv" label="Pv"/>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">{{ 'table.confirm' }}</el-button>
-      </span>
-    </el-dialog>
-
     <el-dialog :visible.sync="deleteVisible" title="确认删除" width="30%">
       <span>删除后将不可恢复，确认删除？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="deleteVisible = false">取 消</el-button>
-        <el-button type="primary" @click="deleteVisible = false">确 定</el-button>
+        <el-button type="primary" @click="confirmDelete()">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -138,11 +115,12 @@
 </template>
 
 <script>
-import { pageCampaign, getCampaign } from '@/api/campaign'
+import { pageCampaign, getCampaign, deleteCampaign, updateCamapign, saveCampaign } from '@/api/campaign'
 import { listNetwork } from '@/api/network'
 import { listTraffic } from '@/api/traffic'
+import { listOffer } from '@/api/offer'
+import { listByTrafficId } from '@/api/trafficToken'
 import waves from '@/directive/waves' // Waves directive
-import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 const calendarTypeOptions = [
@@ -181,6 +159,7 @@ export default {
       list: null,
       networkList: null,
       trafficList: null,
+      offerList: null,
       total: 0,
       listLoading: true,
       listQuery: {
@@ -191,38 +170,27 @@ export default {
         name: null,
         beginDate: null,
         endDate: null,
-        sorts: null
+        sorts: [{
+          'fieldName': 'dateUpdate',
+          'sortType': 'descending'
+        }]
       },
-      importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
-      sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
-      statusOptions: ['published', 'draft', 'deleted'],
-      showReviewer: false,
       temp: {
+        id: null,
         name: null,
         costPerClick: null,
         trafficId: null,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
+        offerId: null,
+        tokens: []
       },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
-      },
-      dialogPvVisible: false,
-      pvData: [],
-      rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+        update: '编辑',
+        create: '创建'
       },
       deleteVisible: false,
+      tempDeleteId: null,
       downloadLoading: false,
       beginDate: '',
       endDate: ''
@@ -232,6 +200,7 @@ export default {
     this.getList()
     this.listNetwork()
     this.listTraffic()
+    this.listOffer()
   },
   methods: {
     getList() {
@@ -258,16 +227,24 @@ export default {
         this.trafficList = response.data
       })
     },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作成功',
-        type: 'success'
+    listOffer() {
+      listOffer().then(response => {
+        this.offerList = response.data
       })
-      row.status = status
+    },
+    listTrafficToken() {
+      const trafficId = this.temp.trafficId
+      listByTrafficId(trafficId).then(response => {
+        const datas = response.data
+        for (const i in datas) {
+          const data = datas[i]
+          this.temp.tokens.push({
+            name: data.name,
+            value: data.value,
+            id: data.id
+          })
+        }
+      })
     },
     sortChange(data) {
       const { prop, order } = data
@@ -287,13 +264,12 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
+        name: null,
+        costPerClick: null,
+        trafficId: null,
+        offerId: null,
+        tokens: [],
+        status: 'published'
       }
     },
     handleCreate() {
@@ -305,50 +281,91 @@ export default {
       })
     },
     createData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
+      const param = this.temp
+      saveCampaign(param).then(response => {
+        if (response.code === '1') {
+          this.$notify({
+            title: '成功',
+            message: '创建成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.dialogFormVisible = false
+          this.getList()
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '创建失败',
+            type: 'fail',
+            duration: 2000
+          })
+        }
+      })
+    },
+    updateData() {
+      const param = this.temp
+      updateCamapign(param.id, param).then(response => {
+        if (response.code === '1') {
+          this.$notify({
+            title: '成功',
+            message: '更新成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.dialogFormVisible = false
+          this.getList()
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '更新失败',
+            type: 'fail',
+            duration: 2000
+          })
         }
       })
     },
     handleUpdate(row) {
+      this.resetTemp()
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       const id = row.id
+      this.temp.id = id
       getCampaign(id).then(response => {
         const data = response.data
         this.temp.name = data.name
         this.temp.costPerClick = data.costPerClick
         this.temp.trafficId = data.trafficId
+        this.temp.offerId = data.offerId
       })
     },
-    updateData() {
-      this.$refs['dataForm'].validate((valid) => {
+    addToken() {
+      this.temp.tokens.push({
+        name: null,
+        value: null,
+        id: null
       })
+    },
+    deleteToken(index) {
+      this.temp.tokens.splice(index, 1)
     },
     handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
+      this.deleteVisible = true
+      this.tempDeleteId = row.id
     },
-    handleFetchPv(pv) {
-    },
-    handleDownload() {
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
+    confirmDelete() {
+      deleteCampaign(this.tempDeleteId).then(response => {
+        const code = response.code
+        if (code === '1') {
+          this.$notify({
+            title: '成功',
+            message: '删除成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.deleteVisible = false
+          this.getList()
         }
-      }))
+      })
     }
   }
 }

@@ -15,7 +15,7 @@ export function pageCampaign(query) {
 export function saveCampaign(data) {
   return request({
     url: '/campaign',
-    method: 'get',
+    method: 'put',
     data: data
   })
 }
@@ -37,7 +37,7 @@ export function updateCamapign(id, param) {
 
 export function deleteCampaign(id) {
   return request({
-    url: '/campaign' + id,
+    url: '/campaign/' + id,
     method: 'delete'
   })
 }

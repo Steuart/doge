@@ -42,3 +42,10 @@ export function deleteOffer(id) {
   })
 }
 
+export function listOffer() {
+  return request({
+    url: '/offer/list',
+    method: 'get'
+  })
+}
+
