@@ -8,7 +8,7 @@ export function listByCampaignId(campaignId) {
   return request({
     url: '/campaignToken/list',
     method: 'get',
-    data: {
+    params: {
       campaignId: campaignId
     }
   })

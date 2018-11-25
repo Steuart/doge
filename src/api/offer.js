@@ -14,8 +14,8 @@ export function getOfferById(id) {
 export function pageOffer(query) {
   return request({
     url: '/offer/page',
-    method: 'get',
-    params: query
+    method: 'post',
+    data: query
   })
 }
 

@@ -45,7 +45,7 @@
         </template>
       </el-table-column>
       <el-table-column :label="'创建时间'" sortable="custom" property="dateCreate" width="170px" align="center" />
-      <el-table-column :label="'任务'" property="redirectLink" />
+      <el-table-column :label="'跳转链接'" property="redirectLink" />
       <el-table-column :label="'转化'" sortable="custom" property="leads" width="110px" align="center" />
       <el-table-column :label="'点击'" sortable="custom" property="clicks" width="110px" align="center" />
       <el-table-column :label="'CPC(%)'" sortable="custom" property="costPerClick" width="110px" align="center" />
@@ -120,6 +120,7 @@ import { listNetwork } from '@/api/network'
 import { listTraffic } from '@/api/traffic'
 import { listOffer } from '@/api/offer'
 import { listByTrafficId } from '@/api/trafficToken'
+import { listByCampaignId } from '@/api/campaignToken'
 import waves from '@/directive/waves' // Waves directive
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
@@ -172,7 +173,7 @@ export default {
         endDate: null,
         sorts: [{
           'fieldName': 'dateUpdate',
-          'sortType': 'descending'
+          'sortType': 'desc'
         }]
       },
       temp: {
@@ -234,6 +235,7 @@ export default {
     },
     listTrafficToken() {
       const trafficId = this.temp.trafficId
+      this.temp.tokens = []
       listByTrafficId(trafficId).then(response => {
         const datas = response.data
         for (const i in datas) {
@@ -327,15 +329,39 @@ export default {
     handleUpdate(row) {
       this.resetTemp()
       this.dialogStatus = 'update'
-      this.dialogFormVisible = true
       const id = row.id
       this.temp.id = id
       getCampaign(id).then(response => {
-        const data = response.data
-        this.temp.name = data.name
-        this.temp.costPerClick = data.costPerClick
-        this.temp.trafficId = data.trafficId
-        this.temp.offerId = data.offerId
+        if (response.code === '1') {
+          const data = response.data
+          this.temp.name = data.name
+          this.temp.costPerClick = data.costPerClick
+          this.temp.trafficId = data.trafficId
+          this.temp.offerId = data.offerId
+          this.dialogFormVisible = true
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '查询campaign失败，请稍后重试',
+            type: 'fail',
+            duration: 2000
+          })
+          this.dialogFormVisible = false
+        }
+      })
+      listByCampaignId(id).then(response => {
+        if (response.code === '1') {
+          this.temp.tokens = response.data
+          this.dialogFormVisible = true
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '查询token失败，请稍后重试',
+            type: 'fail',
+            duration: 2000
+          })
+          this.dialogFormVisible = false
+        }
       })
     },
     addToken() {

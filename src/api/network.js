@@ -29,7 +29,7 @@ export function listNetwork() {
   })
 }
 
-export function sveNetwork(param) {
+export function saveNetwork(param) {
   return request({
     url: '/network',
     method: 'put',
