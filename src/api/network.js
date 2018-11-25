@@ -14,8 +14,8 @@ export function getNetworkById(id) {
 export function pageNetwork(query) {
   return request({
     url: '/network/page',
-    method: 'get',
-    params: query
+    method: 'post',
+    data: query
   })
 }
 
@@ -47,7 +47,7 @@ export function updateNetwork(id, param) {
 
 export function deleteNetwork(id) {
   return request({
-    url: '/network' + id,
+    url: '/network/' + id,
     method: 'delete'
   })
 }

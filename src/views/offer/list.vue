@@ -116,7 +116,6 @@
 import { pageOffer, saveOffer, updateOffer, deleteOffer, getOfferById } from '@/api/offer'
 import { listNetwork } from '@/api/network'
 import waves from '@/directive/waves' // Waves directive
-import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 const calendarTypeOptions = [
@@ -355,20 +354,6 @@ export default {
           })
         }
       })
-    },
-    handleFetchPv(pv) {
-    },
-    handleDownload() {
-      this.downloadLoading = true
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
     }
   }
 }

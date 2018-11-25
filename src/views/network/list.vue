@@ -2,19 +2,21 @@
   <div class="app-container">
     <div class="filter-container">
       <el-date-picker
-        v-model="beginDate"
+        v-model="listQuery.beginDate"
+        value-format="yyyy-MM-dd HH:mm:ss"
         class="filter-item"
         type="date"
         placeholder="开始日期"
         style="width: 150px"/>
       <span class="filter-item">-</span>
       <el-date-picker
-        v-model="endDate"
+        v-model="listQuery.endDate"
+        value-format="yyyy-MM-dd HH:mm:ss"
         class="filter-item"
         type="date"
         placeholder="结束日期"
         style="width: 150px"/>
-      <el-input :placeholder="'名字'" v-model="listQuery.title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input :placeholder="'名字'" v-model="listQuery.name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" circle @click="handleFilter" />
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">{{ '新增' }}</el-button>
     </div>
@@ -28,95 +30,52 @@
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange">
-      <el-table-column :label="'table.id'" prop="id" align="center" width="65">
+      <el-table-column :label="'编号'" type="index" align="center" width="65" />
+      <el-table-column :label="'名字'" prop="name" align="center" width="120" />
+      <el-table-column :label="'主页'" prop="homePage" width="200px" align="center" />
+      <el-table-column :label="'总收入'" prop="earnings" align="center" width="120" />
+      <el-table-column :label="'任务数'" prop="offerNumber" align="center" width="120" />
+      <el-table-column :label="'EPC'" prop="epc" align="center" width="120" />
+      <el-table-column :label="'简介'" prop="remark" />
+      <el-table-column :label="'创建时间'" prop="dateCreate" sortable="customer" width="155px" align="center" />
+      <el-table-column :label="'操作'" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'名字'" prop="id" align="center" width="65">
-        <template slot-scope="scope">
-          <span>{{ scope.row.type }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'收入'" prop="id" align="center" width="65">
-        <template slot-scope="scope">
-          <span>{{ scope.row.type }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'任务数'" prop="id" align="center" width="65">
-        <template slot-scope="scope">
-          <span>{{ scope.row.type }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'EPC'" prop="id" align="center" width="65">
-        <template slot-scope="scope">
-          <span>{{ scope.row.type }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'主页'" sortable="custom" width="150px" align="center">
-        <template slot-scope="scope">
-          <span >{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'简介'">
-        <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
-          <el-tag>{{ scope.row.type | typeFilter }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'创建时间'" width="110px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'table.actions'" align="center" width="230" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ 'table.edit' }}</el-button>
-          <el-button size="mini" type="danger" @click="deleteVisible = true">{{ 'table.delete' }}
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ '编辑' }}</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ '删除' }}
           </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNo" :limit.sync="listQuery.pageSize" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="700px" class="edit-dialog">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
+      <el-form ref="dataForm" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
         <el-form-item :label="'名字'" prop="title">
-          <el-input v-model="temp.title"/>
+          <el-input v-model="temp.name"/>
         </el-form-item>
         <el-form-item :label="'主页'" prop="type">
-          <el-input v-model="temp.title"/>
+          <el-input v-model="temp.homePage"/>
         </el-form-item>
         <el-form-item :label="'简介'" prop="type">
           <el-input
-            v-model="temp.title"
+            v-model="temp.remark"
             :rows="6"
             type="textarea"
             placeholder="请输入内容"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">{{ 'table.cancel' }}</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ 'table.confirm' }}</el-button>
+        <el-button @click="dialogFormVisible = false">{{ '取消' }}</el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ '确认' }}</el-button>
       </div>
-    </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel"/>
-        <el-table-column prop="pv" label="Pv"/>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">{{ 'table.confirm' }}</el-button>
-      </span>
     </el-dialog>
 
     <el-dialog :visible.sync="deleteVisible" title="确认删除" width="30%">
       <span>删除后将不可恢复，确认删除？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="deleteVisible = false">取 消</el-button>
-        <el-button type="primary" @click="deleteVisible = false">确 定</el-button>
+        <el-button type="primary" @click="confirmDelete()">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -124,9 +83,8 @@
 </template>
 
 <script>
-import { pageNetwork } from '@/api/network'
+import { pageNetwork, saveNetwork, updateNetwork, deleteNetwork, getNetworkById } from '@/api/network'
 import waves from '@/directive/waves' // Waves directive
-import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 const calendarTypeOptions = [
@@ -166,44 +124,30 @@ export default {
       total: 0,
       listLoading: true,
       listQuery: {
-        page: 1,
-        limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
+        pageNo: 1,
+        pageSize: 20,
+        name: undefined,
+        beginDate: undefined,
+        endDate: undefined,
+        sorts: [{
+          'fieldName': 'dateUpdate',
+          'sortType': 'desc'
+        }]
       },
-      importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
-      sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
-      statusOptions: ['published', 'draft', 'deleted'],
-      showReviewer: false,
       temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
+        id: null,
+        name: null,
+        homePage: null,
+        remark: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
-      },
-      dialogPvVisible: false,
-      pvData: [],
-      rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+        update: '编辑',
+        create: '创建'
       },
       deleteVisible: false,
-      downloadLoading: false,
-      beginDate: '',
-      endDate: ''
+      tempDeleteId: null
     }
   },
   created() {
@@ -250,13 +194,10 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
+        id: null,
+        name: null,
+        homePage: null,
+        remark: ''
       }
     },
     handleCreate() {
@@ -268,16 +209,37 @@ export default {
       })
     },
     createData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
+      saveNetwork(this.temp).then(response => {
+        if (response.code === '1') {
+          this.$notify({
+            title: '成功',
+            message: '创建成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.dialogFormVisible = false
+          this.getList()
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '创建失败',
+            type: 'fail',
+            duration: 2000
+          })
         }
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
+      const id = row.id
+      getNetworkById(id).then(response => {
+        const data = response.data
+        this.temp = {
+          id: data.id,
+          name: data.name,
+          homePage: data.homePage,
+          remark: data.remark
+        }
+      })
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -285,36 +247,50 @@ export default {
       })
     },
     updateData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+      updateNetwork(this.temp.id, this.temp).then(response => {
+        if (response.code === '1') {
+          this.$notify({
+            title: '成功',
+            message: '更新成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.dialogFormVisible = false
+          this.getList()
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '更新失败，请稍后重试',
+            type: 'fail',
+            duration: 2000
+          })
         }
       })
     },
     handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
+      this.tempDeleteId = row.id
+      this.deleteVisible = true
     },
-    handleFetchPv(pv) {
-    },
-    handleDownload() {
-      this.downloadLoading = true
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
+    confirmDelete() {
+      deleteNetwork(this.tempDeleteId).then(response => {
+        if (response.code === '1') {
+          this.$notify({
+            title: '成功',
+            message: '删除成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.getList()
+          this.deleteVisible = false
         } else {
-          return v[j]
+          this.$notify({
+            title: '失败',
+            message: '删除失败，请稍后重试',
+            type: 'fail',
+            duration: 2000
+          })
         }
-      }))
+      })
     }
   }
 }
