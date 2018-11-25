@@ -2,19 +2,19 @@
   <div class="app-container">
     <div class="filter-container">
       <el-date-picker
-        v-model="beginDate"
+        v-model="listQuery.beginDate"
         class="filter-item"
         type="date"
         placeholder="开始日期"
         style="width: 150px"/>
       <span class="filter-item">-</span>
       <el-date-picker
-        v-model="endDate"
+        v-model="listQuery.endDate"
         class="filter-item"
         type="date"
         placeholder="结束日期"
         style="width: 150px"/>
-      <el-input :placeholder="'名字'" v-model="listQuery.title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input :placeholder="'名字'" v-model="listQuery.name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" circle @click="handleFilter" />
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">{{ '新增' }}</el-button>
     </div>
@@ -22,144 +22,58 @@
     <el-table
       v-loading="listLoading"
       :key="tableKey"
-      :data="list"
+      :data="items"
       border
       fit
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange">
-      <el-table-column :label="'table.id'" prop="id" align="center" width="65">
+      <el-table-column :label="'编号'" type="index" align="center" width="65" />
+      <el-table-column :label="'名字'" prop="name" align="center" width="120" />
+      <el-table-column :label="'主页'" prop="homePage" align="center" width="200" />
+      <el-table-column :label="'备注'" prop="remark" align="center" />
+      <el-table-column :label="'创建时间'" prop="dateCreate" sortable="custom" width="150px" align="center" />
+      <el-table-column :label="'总转化'" prop="leads" width="110px" align="center" />
+      <el-table-column :label="'总点击'" prop="clicks" width="110px" align="center" />
+      <el-table-column :label="'CPC(%)'" prop="CPC" width="80px" />
+      <el-table-column :label="'操作'" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'名字'" prop="id" align="center" width="65">
-        <template slot-scope="scope">
-          <span>{{ scope.row.type }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'创建时间'" sortable="custom" width="150px" align="center">
-        <template slot-scope="scope">
-          <span >{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'任务'">
-        <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
-          <el-tag>{{ scope.row.type | typeFilter }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'转化'" width="110px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column v-if="showReviewer" :label="'点击'" width="110px" align="center">
-        <template slot-scope="scope">
-          <span style="color:red;">{{ scope.row.reviewer }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'CPC(%)'" width="80px">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'PPL(%)'" align="center" width="95">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'CVR(%)'" class-name="status-col" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'CPC(%)'" class-name="status-col" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'ROI(%)'" class-name="status-col" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'table.actions'" align="center" width="230" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ 'table.edit' }}</el-button>
-          <el-button size="mini" type="danger" @click="deleteVisible = true">{{ 'table.delete' }}
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ '编辑' }}</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ '删除' }}
           </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNo" :limit.sync="listQuery.pageSize" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="700px" class="edit-dialog">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
+      <el-form ref="dataForm" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
         <el-form-item :label="'名字'" prop="title">
-          <el-input v-model="temp.title"/>
+          <el-input v-model="temp.name"/>
         </el-form-item>
-        <el-form-item :label="'类型'" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
-          </el-select>
+        <el-form-item :label="'主页'" prop="type">
+          <el-input v-model="temp.homePage"/>
         </el-form-item>
-        <el-form-item :label="'任务'" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="'流量平台'" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="'CPC'" prop="title">
-          <el-input v-model="temp.title" style="width: 100%"/>
-        </el-form-item>
-        <el-form-item :inline="true" :label="'token'" prop="title">
-          <el-switch v-model="temp.type" />
+        <el-form-item :label="'备注'" prop="title">
+          <el-input v-model="temp.remark" style="width: 100%"/>
         </el-form-item>
         <div class="token">
-          <el-form-item :label="'p1'">
-            <el-input v-model="temp.type"/>
-            <el-input v-model="temp.type"/>
-            <el-button style="display: inline;">删除</el-button>
-          </el-form-item>
-
-          <el-form-item :label="'p1'">
-            <el-input v-model="temp.type"/>
-            <el-input v-model="temp.type"/>
-            <el-button style="display: inline;">删除</el-button>
-          </el-form-item>
-
-          <el-form-item :label="'p1'">
-            <el-input v-model="temp.type"/>
-            <el-input v-model="temp.type"/>
-            <el-button style="display: inline;">删除</el-button>
+          <el-form-item v-for="(item, index) in temp.tokens" :key="item.id" :label="'p'+index">
+            <el-input v-model="item.name"/>
+            <el-input v-model="item.value"/>
+            <el-button style="display: inline;" @click="deleteToken(index)">删除</el-button>
           </el-form-item>
         </div>
         <el-form-item>
-          <el-button round style="width: 100%">+</el-button>
+          <el-button round style="width: 100%" @click="addToken">+</el-button>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">{{ 'table.cancel' }}</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ 'table.confirm' }}</el-button>
+        <el-button @click="dialogFormVisible = false">{{ '取消' }}</el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ '确认' }}</el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel"/>
-        <el-table-column prop="pv" label="Pv"/>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">{{ 'table.confirm' }}</el-button>
-      </span>
-    </el-dialog>
-
     <el-dialog :visible.sync="deleteVisible" title="确认删除" width="30%">
       <span>删除后将不可恢复，确认删除？</span>
       <span slot="footer" class="dialog-footer">
@@ -210,16 +124,19 @@ export default {
   data() {
     return {
       tableKey: 0,
-      list: null,
+      items: null,
       total: 0,
       listLoading: true,
       listQuery: {
-        page: 1,
-        limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
+        pageNo: 1,
+        pageSize: 20,
+        name: null,
+        beginDate: null,
+        endDate: null,
+        sorts: [{
+          'fieldName': 'dateUpdate',
+          'sortType': 'desc'
+        }]
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
@@ -227,13 +144,11 @@ export default {
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
-        id: undefined,
-        importance: 1,
+        id: null,
+        name: null,
+        homePage: null,
         remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
+        tokens: []
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -262,9 +177,8 @@ export default {
       this.listLoading = true
       pageTraffic(this.listQuery).then(response => {
         const data = response.data
-        this.list = data.list
+        this.items = data.list
         this.total = data.total
-
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
@@ -272,7 +186,7 @@ export default {
       })
     },
     handleFilter() {
-      this.listQuery.page = 1
+      this.listQuery.pageNo = 1
       this.getList()
     },
     handleModifyStatus(row, status) {
@@ -284,27 +198,37 @@ export default {
     },
     sortChange(data) {
       const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
+      if (prop !== null) {
+        let sortType = 'asc'
+        if (order === 'descending') {
+          sortType = 'desc'
+        } else {
+          sortType = 'asc'
+        }
+        this.listQuery.sorts = [{
+          'fieldName': prop,
+          'sortType': sortType
+        }]
       }
+      this.getList()
     },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
+    addToken() {
+      this.temp.tokens.push({
+        name: null,
+        value: null,
+        id: null
+      })
+    },
+    deleteToken(index) {
+      this.temp.tokens.splice(index, 1)
     },
     resetTemp() {
       this.temp = {
-        id: undefined,
-        importance: 1,
+        id: null,
+        name: null,
+        homePage: null,
         remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
+        tokens: []
       }
     },
     handleCreate() {

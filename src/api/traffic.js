@@ -37,8 +37,8 @@ export function deleteTraffic(id) {
 export function pageTraffic(query) {
   return request({
     url: '/traffic/page',
-    method: 'get',
-    params: query
+    method: 'post',
+    data: query
   })
 }
 
