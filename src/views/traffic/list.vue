@@ -5,6 +5,7 @@
         v-model="listQuery.beginDate"
         class="filter-item"
         type="date"
+        value-format="yyyy-MM-dd HH:mm:ss"
         placeholder="开始日期"
         style="width: 150px"/>
       <span class="filter-item">-</span>
@@ -12,6 +13,7 @@
         v-model="listQuery.endDate"
         class="filter-item"
         type="date"
+        value-format="yyyy-MM-dd HH:mm:ss"
         placeholder="结束日期"
         style="width: 150px"/>
       <el-input :placeholder="'名字'" v-model="listQuery.name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
@@ -32,7 +34,7 @@
       <el-table-column :label="'名字'" prop="name" align="center" width="120" />
       <el-table-column :label="'主页'" prop="homePage" align="center" width="200" />
       <el-table-column :label="'备注'" prop="remark" align="center" />
-      <el-table-column :label="'创建时间'" prop="dateCreate" sortable="custom" width="150px" align="center" />
+      <el-table-column :label="'创建时间'" prop="dateCreate" sortable="custom" width="170px" align="center" />
       <el-table-column :label="'总转化'" prop="leads" width="110px" align="center" />
       <el-table-column :label="'总点击'" prop="clicks" width="110px" align="center" />
       <el-table-column :label="'CPC(%)'" prop="CPC" width="80px" />
@@ -60,7 +62,18 @@
         </el-form-item>
         <div class="token">
           <el-form-item v-for="(item, index) in temp.tokens" :key="item.id" :label="'p'+index">
-            <el-input v-model="item.name"/>
+            <el-select v-model="item.name" style="width: 40%" placeholder="请选择">
+              <el-option-group
+                v-for="group in quotas"
+                :key="group.id"
+                :label="group.name">
+                <el-option
+                  v-for="child in group.children"
+                  :key="child.code"
+                  :label="child.name"
+                  :value="child.code" />
+              </el-option-group>
+            </el-select>
             <el-input v-model="item.value"/>
             <el-button style="display: inline;" @click="deleteToken(index)">删除</el-button>
           </el-form-item>
@@ -78,7 +91,7 @@
       <span>删除后将不可恢复，确认删除？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="deleteVisible = false">取 消</el-button>
-        <el-button type="primary" @click="deleteVisible = false">确 定</el-button>
+        <el-button type="primary" @click="confirmDelete()">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -86,9 +99,10 @@
 </template>
 
 <script>
-import { pageTraffic } from '@/api/traffic'
+import { pageTraffic, getTrafficById, saveTraffic, updateTraffic, deleteTraffic } from '@/api/traffic'
+import { listByIdRefAndType } from '@/api/tokens'
+import { listAll } from '@/api/quota'
 import waves from '@/directive/waves' // Waves directive
-import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 const calendarTypeOptions = [
@@ -166,11 +180,14 @@ export default {
       deleteVisible: false,
       downloadLoading: false,
       beginDate: '',
-      endDate: ''
+      endDate: '',
+      tempDeleteId: null,
+      quotas: []
     }
   },
   created() {
     this.getList()
+    this.listQuotas()
   },
   methods: {
     getList() {
@@ -183,6 +200,12 @@ export default {
         setTimeout(() => {
           this.listLoading = false
         }, 150)
+      })
+    },
+    // 列出所有的指标
+    listQuotas() {
+      listAll().then(response => {
+        this.quotas = response.data
       })
     },
     handleFilter() {
@@ -240,53 +263,107 @@ export default {
       })
     },
     createData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
+      const param = this.temp
+      saveTraffic(param).then(response => {
+        if (response.code === '1') {
+          this.$notify({
+            title: '成功',
+            message: '创建成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.dialogFormVisible = false
+          this.getList()
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '创建失败',
+            type: 'fail',
+            duration: 2000
+          })
         }
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
+      this.resetTemp()
       this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+      const id = row.id
+      this.temp.id = id
+      getTrafficById(id).then(response => {
+        if (response.code === '1') {
+          const data = response.data
+          this.temp.name = data.name
+          this.temp.id = data.id
+          this.temp.homePage = data.homePage
+          this.temp.remark = data.remark
+          this.dialogFormVisible = true
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '查询campaign失败，请稍后重试',
+            type: 'fail',
+            duration: 2000
+          })
+          this.dialogFormVisible = false
+        }
+      })
+      listByIdRefAndType(id, 1).then(response => {
+        if (response.code === '1') {
+          if (response.data !== null) {
+            this.temp.tokens = response.data
+          }
+          this.dialogFormVisible = true
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '查询token失败，请稍后重试',
+            type: 'fail',
+            duration: 2000
+          })
+          this.dialogFormVisible = false
+        }
       })
     },
     updateData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+      const param = this.temp
+      updateTraffic(param.id, param).then(response => {
+        if (response.code === '1') {
+          this.$notify({
+            title: '成功',
+            message: '更新成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.dialogFormVisible = false
+          this.getList()
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '更新失败',
+            type: 'fail',
+            duration: 2000
+          })
         }
       })
     },
     handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
+      this.tempDeleteId = row.id
+      this.deleteVisible = true
     },
-    handleFetchPv(pv) {
-    },
-    handleDownload() {
-      this.downloadLoading = true
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
+    confirmDelete() {
+      deleteTraffic(this.tempDeleteId).then(response => {
+        const code = response.code
+        if (code === '1') {
+          this.$notify({
+            title: '成功',
+            message: '删除成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.deleteVisible = false
+          this.getList()
         }
-      }))
+      })
     }
   }
 }

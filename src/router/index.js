@@ -77,7 +77,7 @@ export const constantRouterMap = [
     redirect: '/campaign',
     alwaysShow: true, // will always show the root menu
     meta: {
-      title: '项目',
+      title: '营销',
       icon: 'component'
     },
     children: [

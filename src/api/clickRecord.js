@@ -7,7 +7,7 @@ import request from '@/utils/request'
 export function pageCampaign(query) {
   return request({
     url: '/clickRecord/page',
-    method: 'get',
-    params: query
+    method: 'post',
+    data: query
   })
 }

@@ -1,74 +1,39 @@
 <template>
   <div class="app-container">
-
-    <div class="field-container">
-      <h3>基本属性</h3>
-      <el-checkbox-group v-model="checkboxVal">
-        <el-checkbox label="apple">任务</el-checkbox>
-        <el-checkbox label="banana">项目</el-checkbox>
-        <el-checkbox label="orange">流量平台</el-checkbox>
-        <el-checkbox label="orange">创建时间</el-checkbox>
-        <el-checkbox label="orange">更新时间</el-checkbox>
-      </el-checkbox-group>
-      <h3>设备属性</h3>
-      <el-checkbox-group v-model="checkboxVal">
-        <el-checkbox label="apple">访问IP</el-checkbox>
-        <el-checkbox label="banana">Reffer</el-checkbox>
-        <el-checkbox label="orange">User_agent</el-checkbox>
-        <el-checkbox label="orange">代理IP</el-checkbox>
-        <el-checkbox label="orange">设备语言</el-checkbox>
-        <el-checkbox label="orange">设备生产商</el-checkbox>
-        <el-checkbox label="orange">设备名称</el-checkbox>
-        <el-checkbox label="orange">设备型号</el-checkbox>
-        <el-checkbox label="orange">操作系统</el-checkbox>
-        <el-checkbox label="orange">系统语言</el-checkbox>
-        <el-checkbox label="orange">显示器大小</el-checkbox>
-        <el-checkbox label="orange">浏览器</el-checkbox>
-      </el-checkbox-group>
-
-      <h3>流量属性</h3>
-      <el-checkbox-group v-model="checkboxVal">
-        <el-checkbox label="apple">任务点击时间</el-checkbox>
-        <el-checkbox label="banana">Offer点击时间</el-checkbox>
-        <el-checkbox label="orange">转化时间</el-checkbox>
-        <el-checkbox label="orange">CPC</el-checkbox>
-        <el-checkbox label="orange">质量</el-checkbox>
-        <el-checkbox label="orange">类型</el-checkbox>
-      </el-checkbox-group>
-
-      <h3>地理属性</h3>
-      <el-checkbox-group v-model="checkboxVal">
-        <el-checkbox label="apple">网速</el-checkbox>
-        <el-checkbox label="banana">运营商</el-checkbox>
-        <el-checkbox label="orange">国家名称</el-checkbox>
-        <el-checkbox label="orange">省名称</el-checkbox>
-        <el-checkbox label="orange">区名称</el-checkbox>
-      </el-checkbox-group>
-    </div>
+    <ul class="field-container">
+      <li v-for="quota in quotas" :key="quota.id">
+        <h3>{{ quota.name }}</h3>
+        <el-checkbox-group v-model="checkboxVal">
+          <el-checkbox v-for="child in quota.children" :label="child.code" :key="child.code">{{ child.name }}</el-checkbox>
+        </el-checkbox-group>
+      </li>
+    </ul>
     <div class="filter-container">
-      <el-select v-model="listQuery.importance" :placeholder="'流量平台'" clearable style="width: 130px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item"/>
+      <el-select v-model="listQuery.trafficId" :placeholder="'流量平台'" clearable style="width: 130px" class="filter-item">
+        <el-option v-for="item in trafficList" :key="item.id" :label="item.name" :value="item.id"/>
       </el-select>
-      <el-select v-model="listQuery.type" :placeholder="'网络联盟'" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key"/>
+      <el-select v-model="listQuery.networkId" :placeholder="'网络联盟'" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in networkList" :key="item.id" :label="item.name" :value="item.id"/>
       </el-select>
-      <el-select v-model="listQuery.type" :placeholder="'任务'" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key"/>
+      <el-select v-model="listQuery.offerId" :placeholder="'任务'" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in offerList" :key="item.id" :label="item.name" :value="item.id"/>
       </el-select>
       <el-date-picker
-        v-model="beginDate"
+        v-model="listQuery.createBeginDate"
         class="filter-item"
         type="date"
+        value-format="yyyy-MM-dd HH:mm:ss"
         placeholder="开始日期"
         style="width: 150px"/>
       <span class="filter-item">-</span>
       <el-date-picker
-        v-model="endDate"
+        v-model="listQuery.createEndDate"
         class="filter-item"
         type="date"
+        value-format="yyyy-MM-dd HH:mm:ss"
         placeholder="结束日期"
         style="width: 150px"/>
-      <el-input :placeholder="'名字'" v-model="listQuery.title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <!--<el-input :placeholder="'名字'" v-model="listQuery.title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>-->
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" circle @click="handleFilter" />
     </div>
 
@@ -81,71 +46,20 @@
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange">
-      <el-table-column :label="'table.id'" prop="id" align="center" width="65">
+      <el-table-column :label="'编号'" type="index" align="center" />
+      <el-table-column :label="'营销'" prop="campaignName" align="center" />
+      <el-table-column :label="'任务'" prop="offerName" align="center" />
+      <el-table-column :label="'流量'" prop="trafficName" align="center" />
+      <el-table-column :label="'网络联盟'" prop="networkName" align="center" />
+      <el-table-column :label="'创建时间'" prop="dateCreate" sortable="custom" align="center" />
+      <el-table-column v-for="quotaCode in formThead" :key="quotaCode" :label="quotasMap[quotaCode]">
         <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'名字'" prop="id" align="center" width="65">
-        <template slot-scope="scope">
-          <span>{{ scope.row.type }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'创建时间'" sortable="custom" width="150px" align="center">
-        <template slot-scope="scope">
-          <span >{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'任务'">
-        <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.title }}</span>
-          <el-tag>{{ scope.row.type | typeFilter }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'转化'" width="110px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column v-if="showReviewer" :label="'点击'" width="110px" align="center">
-        <template slot-scope="scope">
-          <span style="color:red;">{{ scope.row.reviewer }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'CPC(%)'" width="80px">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'PPL(%)'" align="center" width="95">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'CVR(%)'" class-name="status-col" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'CPC(%)'" class-name="status-col" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'ROI(%)'" class-name="status-col" width="100">
-        <template slot-scope="scope">
-          <span>{{ scope.row.pageviews }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'table.actions'" align="center" width="100" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button size="mini" type="danger" @click="deleteVisible = true">{{ 'table.delete' }}
-          </el-button>
+          {{ scope.row.content[quotaCode] }}
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNo" :limit.sync="listQuery.pageSize" @pagination="getList" />
 
     <el-dialog :visible.sync="deleteVisible" title="确认删除" width="30%">
       <span>删除后将不可恢复，确认删除？</span>
@@ -154,15 +68,21 @@
         <el-button type="primary" @click="deleteVisible = false">确 定</el-button>
       </span>
     </el-dialog>
-
+    <el-tooltip placement="top" content="返回顶部">
+      <back-to-top :visibility-height="300" :back-position="50" transition-name="fade"/>
+    </el-tooltip>
   </div>
 </template>
 
 <script>
 import { pageCampaign } from '@/api/clickRecord'
+import { listAll } from '@/api/quota'
+import { listNetwork } from '@/api/network'
+import { listTraffic } from '@/api/traffic'
+import { listOffer } from '@/api/offer'
 import waves from '@/directive/waves' // Waves directive
-import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+import BackToTop from '@/components/BackToTop'
 
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
@@ -179,7 +99,7 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 
 export default {
   name: 'ComplexTable',
-  components: { Pagination },
+  components: { Pagination, BackToTop },
   directives: { waves },
   filters: {
     statusFilter(status) {
@@ -200,13 +120,28 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      quotas: [],
+      quotasMap: {},
+      quotasArr: [],
+      checkList: [],
+      formThead: [],
+      checkboxVal: [],
+      networkList: null,
+      trafficList: null,
+      offerList: null,
       listQuery: {
-        page: 1,
-        limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
+        pageNo: 1,
+        pageSize: 20,
+        trafficId: null,
+        networkId: null,
+        offerId: null,
+        campaignId: null,
+        createBeginDate: null,
+        createEndDate: null,
+        sorts: [{
+          'fieldName': 'dateUpdate',
+          'sortType': 'desc'
+        }]
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
@@ -228,21 +163,23 @@ export default {
         update: 'Edit',
         create: 'Create'
       },
-      dialogPvVisible: false,
-      pvData: [],
-      rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
-      },
       deleteVisible: false,
-      downloadLoading: false,
       beginDate: '',
       endDate: ''
     }
   },
+  watch: {
+    checkboxVal(valArr) {
+      this.formThead = this.quotasArr.filter(code => valArr.indexOf(code) >= 0)
+      this.key = this.key + 1// 为了保证table 每次都会重渲 In order to ensure the table will be re-rendered each time
+    }
+  },
   created() {
     this.getList()
+    this.listAllQuota()
+    this.listNetwork()
+    this.listTraffic()
+    this.listOffer()
   },
   methods: {
     getList() {
@@ -258,86 +195,45 @@ export default {
         }, 1.5 * 200)
       })
     },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作成功',
-        type: 'success'
+    listAllQuota() {
+      listAll().then(response => {
+        this.quotas = response.data
+        for (const i in this.quotas) {
+          const children = this.quotas[i].children
+          for (const j in children) {
+            const quota = children[j]
+            this.quotasMap[quota.code] = quota.name
+            this.quotasArr.push(quota.code)
+          }
+          console.log(this.quotasMap)
+        }
       })
-      row.status = status
+    },
+    // 查询网络联盟列表
+    listNetwork() {
+      listNetwork().then(response => {
+        this.networkList = response.data
+      })
+    },
+    listTraffic() {
+      listTraffic().then(response => {
+        this.trafficList = response.data
+      })
+    },
+    listOffer() {
+      listOffer().then(response => {
+        this.offerList = response.data
+      })
+    },
+    handleFilter() {
+      this.listQuery.pageNo = 1
+      this.getList()
     },
     sortChange(data) {
       const { prop, order } = data
       if (prop === 'id') {
         this.sortByID(order)
       }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
-    },
-    resetTemp() {
-      this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
-      }
-    },
-    handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    createData() {
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    updateData() {
-    },
-    handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
-    },
-    handleFetchPv(pv) {
-    },
-    handleDownload() {
-      this.downloadLoading = true
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
     }
   }
 }
@@ -346,6 +242,7 @@ export default {
 <style rel="stylesheet/scss" lang="scss" scoped>
   .app-container {
     .field-container {
+      list-style-type:none;
       margin-bottom: 30px;
       .el-checkbox-group {
         margin-left: 40px;

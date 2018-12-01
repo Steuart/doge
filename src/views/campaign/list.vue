@@ -89,7 +89,18 @@
         </el-form-item>
         <div class="token">
           <el-form-item v-for="(item, index) in temp.tokens" :key="item.id" :label="'p'+index">
-            <el-input v-model="item.name"/>
+            <el-select v-model="item.name" style="width: 40%" placeholder="请选择">
+              <el-option-group
+                v-for="group in quotas"
+                :key="group.id"
+                :label="group.name">
+                <el-option
+                  v-for="child in group.children"
+                  :key="child.code"
+                  :label="child.name"
+                  :value="child.code" />
+              </el-option-group>
+            </el-select>
             <el-input v-model="item.value"/>
             <el-button style="display: inline;" @click="deleteToken(index)">删除</el-button>
           </el-form-item>
@@ -110,7 +121,9 @@
         <el-button type="primary" @click="confirmDelete()">确 定</el-button>
       </span>
     </el-dialog>
-
+    <el-tooltip placement="top" content="返回顶部">
+      <back-to-top :visibility-height="300" :back-position="50" transition-name="fade"/>
+    </el-tooltip>
   </div>
 </template>
 
@@ -119,11 +132,11 @@ import { pageCampaign, getCampaign, deleteCampaign, updateCamapign, saveCampaign
 import { listNetwork } from '@/api/network'
 import { listTraffic } from '@/api/traffic'
 import { listOffer } from '@/api/offer'
-import { listByTrafficId } from '@/api/trafficToken'
-import { listByCampaignId } from '@/api/campaignToken'
+import { listByIdRefAndType } from '@/api/tokens'
+import { listAll } from '@/api/quota'
 import waves from '@/directive/waves' // Waves directive
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-
+import BackToTop from '@/components/BackToTop'
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
   { key: 'US', display_name: 'USA' },
@@ -139,7 +152,7 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 
 export default {
   name: 'ComplexTable',
-  components: { Pagination },
+  components: { Pagination, BackToTop },
   directives: { waves },
   filters: {
     statusFilter(status) {
@@ -194,7 +207,8 @@ export default {
       tempDeleteId: null,
       downloadLoading: false,
       beginDate: '',
-      endDate: ''
+      endDate: '',
+      quotas: []
     }
   },
   created() {
@@ -202,6 +216,7 @@ export default {
     this.listNetwork()
     this.listTraffic()
     this.listOffer()
+    this.listQuotas()
   },
   methods: {
     getList() {
@@ -236,7 +251,7 @@ export default {
     listTrafficToken() {
       const trafficId = this.temp.trafficId
       this.temp.tokens = []
-      listByTrafficId(trafficId).then(response => {
+      listByIdRefAndType(trafficId, 1).then(response => {
         const datas = response.data
         for (const i in datas) {
           const data = datas[i]
@@ -246,6 +261,12 @@ export default {
             id: data.id
           })
         }
+      })
+    },
+    // 列出所有的指标
+    listQuotas() {
+      listAll().then(response => {
+        this.quotas = response.data
       })
     },
     sortChange(data) {
@@ -349,9 +370,11 @@ export default {
           this.dialogFormVisible = false
         }
       })
-      listByCampaignId(id).then(response => {
+      listByIdRefAndType(id, 0).then(response => {
         if (response.code === '1') {
-          this.temp.tokens = response.data
+          if (response.data !== null) {
+            this.temp.tokens = response.data
+          }
           this.dialogFormVisible = true
         } else {
           this.$notify({
