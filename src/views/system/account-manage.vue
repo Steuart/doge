@@ -16,7 +16,7 @@
         value-format="yyyy-MM-dd HH:mm:ss"
         placeholder="结束日期"
         style="width: 150px"/>
-      <el-input :placeholder="'名字'" v-model="listQuery.name" style="width: 200px;" class="filter-item" />
+      <el-input :placeholder="'名字'" v-model="listQuery.username" style="width: 200px;" class="filter-item" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" circle @click="getList" />
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">新增</el-button>
     </div>
@@ -30,18 +30,22 @@
       style="width: 100%;"
       @sort-change="sortChange">
       <el-table-column :label="'编号'" type="index" align="center" width="65" />
-      <el-table-column :label="'用户名'" prop="username" align="center" width="65" />
+      <el-table-column :label="'用户名'" prop="username" align="center" width="130" />
       <el-table-column :label="'昵称'" prop="nickname" width="150px" align="center" />
       <el-table-column :label="'邮箱'" prop="email" align="center" />
       <el-table-column :label="'联系电话'" prop="phone" align="center" />
       <el-table-column :label="'创建时间'" prop="dateCreate" width="170px" align="center" />
-      <el-table-column :label="'状态'" prop="status" width="110px" align="center" />
+      <el-table-column :label="'状态'" width="110px" align="center" >
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.statusStr }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column :label="'操作'" align="center" width="400" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="small">{{ '禁用' }}</el-button>
+          <el-button type="primary" size="small" @click="statusUpdate(scope.row)">{{ scope.row.status === 0?'禁用':'启用' }}</el-button>
           <el-button type="primary" size="small" @click="handleUpdate(scope.row)">{{ '编辑' }}</el-button>
-          <el-button type="primary" size="small" @click="updatePasswordVisible = true">{{ '修改密码 ' }}</el-button>
-          <el-button size="small" type="danger" @click="deleteVisible = true">{{ '删除' }}
+          <el-button type="primary" size="small" @click="handlerUpdatePassword(scope.row)">{{ '修改密码 ' }}</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(scope.row)">{{ '删除' }}
           </el-button>
         </template>
       </el-table-column>
@@ -76,20 +80,20 @@
     </el-dialog>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="updatePasswordVisible" width="700px" class="edit-dialog">
-      <el-form ref="dataForm" :model="temp" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
+      <el-form ref="dataForm" :model="tempPassword" label-position="left" label-width="100px" style="width: 500px; margin-left:50px;">
         <el-form-item :label="'原密码'" prop="title">
-          <el-input v-model="temp.title"/>
+          <el-input v-model="tempPassword.oldPassword"/>
         </el-form-item>
         <el-form-item :label="'新密码'" prop="type">
-          <el-input v-model="temp.title"/>
+          <el-input v-model="tempPassword.newPassword"/>
         </el-form-item>
         <el-form-item :label="'确认密码'" prop="type">
-          <el-input v-model="temp.title"/>
+          <el-input v-model="tempPassword.confirmPassword"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="updatePasswordVisible = false">{{ '取消' }}</el-button>
-        <el-button type="primary" @click="updatePasswordVisible=false">{{ '确认' }}</el-button>
+        <el-button type="primary" @click="confirmUpdatePassword()">{{ '确认' }}</el-button>
       </div>
     </el-dialog>
 
@@ -97,7 +101,7 @@
       <span>删除后将不可恢复，确认删除？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="deleteVisible = false">取 消</el-button>
-        <el-button type="primary" @click="deleteVisible = false">确 定</el-button>
+        <el-button type="primary" @click="confirmDelete()">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -105,9 +109,8 @@
 </template>
 
 <script>
-import { pageUser, addUser, updateUser } from '@/api/user'
+import { pageUser, addUser, updateUser, updatePasswordWithOld, deleteUser, updateUserStatus } from '@/api/user'
 import waves from '@/directive/waves' // Waves directive
-import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 const calendarTypeOptions = [
@@ -141,8 +144,7 @@ export default {
         limit: 20,
         importance: undefined,
         title: undefined,
-        type: undefined,
-        sort: '+id'
+        type: undefined
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
@@ -170,8 +172,10 @@ export default {
       deleteVisible: false,
       downloadLoading: false,
       updatePasswordVisible: false,
+      tempDeleteId: null,
       beginDate: '',
-      endDate: ''
+      endDate: '',
+      userStatus: ''
     }
   },
   created() {
@@ -181,14 +185,16 @@ export default {
     getList() {
       this.listLoading = true
       pageUser(this.listQuery).then(response => {
-        const data = response.data
-        this.list = data.list
-        this.total = data.total
+        if (response) {
+          const data = response.data
+          this.list = data.list
+          this.total = data.total
 
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 200)
+          // Just to simulate the time of the request
+          setTimeout(() => {
+            this.listLoading = false
+          }, 200)
+        }
       })
     },
     handleFilter() {
@@ -207,14 +213,6 @@ export default {
       if (prop === 'id') {
         this.sortByID(order)
       }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
     },
     resetTemp() {
       this.temp = {
@@ -235,7 +233,7 @@ export default {
     },
     createData() {
       addUser(this.temp).then(response => {
-        if (response.code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '创建成功',
@@ -244,13 +242,6 @@ export default {
           })
           this.dialogFormVisible = false
           this.getList()
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '创建失败',
-            type: 'fail',
-            duration: 2000
-          })
         }
       })
     },
@@ -265,7 +256,7 @@ export default {
     updateData() {
       const id = this.temp.id
       updateUser(id, this.temp).then(response => {
-        if (response.code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '更新成功',
@@ -274,39 +265,82 @@ export default {
           })
           this.dialogFormVisible = false
           this.getList()
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '更新失败',
-            type: 'fail',
-            duration: 2000
-          })
         }
       })
     },
     handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
+      this.tempDeleteId = row.id
+      this.deleteVisible = true
     },
-    handleFetchPv(pv) {
-    },
-    handleDownload() {
-      this.downloadLoading = true
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
+    confirmDelete() {
+      const userId = this.tempDeleteId
+      deleteUser(userId).then(response => {
+        if (response) {
+          this.$notify({
+            title: '成功',
+            message: '删除成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.deleteVisible = false
+          this.getList()
         }
-      }))
+      })
+    },
+    handlerUpdatePassword(row) {
+      this.tempPassword = {
+        username: null,
+        oldPassword: null,
+        newPassword: null,
+        confirmPassword: null
+      }
+      this.tempPassword.username = row.username
+      this.updatePasswordVisible = true
+    },
+    confirmUpdatePassword() {
+      const newPassword = this.tempPassword.newPassword
+      const confirmPassword = this.tempPassword.confirmPassword
+      const username = this.tempPassword.username
+      const oldPassword = this.tempPassword.oldPassword
+      if (newPassword !== confirmPassword) {
+        this.$notify({
+          title: '密码不一致',
+          message: '密码输入不一致',
+          type: 'fail',
+          duration: 2000
+        })
+        return
+      }
+      updatePasswordWithOld(username, oldPassword, newPassword).then(response => {
+        if (response) {
+          this.$notify({
+            title: '成功',
+            message: '更新成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.updatePasswordVisible = false
+          this.getList()
+        }
+      })
+    },
+    statusUpdate(row) {
+      if (row.status === 0) {
+        row.status = 1
+      } else {
+        row.status = 0
+      }
+      updateUserStatus(row.id, row.status).then(response => {
+        if (response) {
+          this.$notify({
+            title: '成功',
+            message: '更新成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.getList()
+        }
+      })
     }
   }
 }
@@ -321,7 +355,6 @@ export default {
       .el-select{
         width: 100%;
       }
-
       .token {
         .el-input{
           width: 40%;

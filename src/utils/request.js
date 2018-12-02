@@ -39,9 +39,18 @@ service.interceptors.response.use(
    * 以下代码均为样例，请结合自生需求加以修改，若不需要，则可删除
    */
   response => {
-    // const res = response.data
-    console.log(response.data)
-    return response.data
+    const res = response.data
+    if (res.code !== '1') {
+      Message({
+        message: res.msg,
+        type: 'error',
+        duration: 5 * 1000
+      })
+      return Promise.reject('error').catch(a => {
+      })
+    } else {
+      return res
+    }
     // if (res.code !== 20000) {
     //   Message({
     //     message: res.message,
@@ -68,13 +77,12 @@ service.interceptors.response.use(
     // }
   },
   error => {
-    console.log('err' + error) // for debug
     Message({
       message: error.message,
       type: 'error',
       duration: 5 * 1000
     })
-    return Promise.reject(error)
+    // return Promise.reject(error)
   }
 )
 

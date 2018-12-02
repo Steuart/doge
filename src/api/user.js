@@ -53,6 +53,22 @@ export function updatePassword(username, password) {
 }
 
 /**
+ * 更新用户密码
+ * @param username
+ * @param password
+ */
+export function updatePasswordWithOld(username, oldPassword, newPassword) {
+  return request({
+    url: '/user/passwordWithOld/' + username,
+    method: 'post',
+    data: {
+      oldPassword: oldPassword,
+      newPassword: newPassword
+    }
+  })
+}
+
+/**
  * 删除用户
  * @param id
  */
@@ -60,5 +76,20 @@ export function deleteUser(id) {
   return request({
     url: '/user/' + id,
     method: 'delete'
+  })
+}
+
+/**
+ * 更新用户状态
+ * @param id
+ * @param status
+ */
+export function updateUserStatus(id, status) {
+  return request({
+    url: '/user/' + id,
+    method: 'post',
+    data: {
+      status: status
+    }
   })
 }
