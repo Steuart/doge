@@ -98,6 +98,12 @@ export const constantRouterMap = [
         meta: { title: '访问日志', noCache: true }
       },
       {
+        path: '/campaign/transfer_log',
+        component: () => import('@/views/campaign/transfer-log.vue'),
+        name: 'transfer_log',
+        meta: { title: '转化日志', noCache: true }
+      },
+      {
         path: '/campaign/detail',
         component: () => import('@/views/campaign/detail.vue'),
         alwaysShow: false,
