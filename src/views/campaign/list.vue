@@ -222,51 +222,63 @@ export default {
     getList() {
       this.listLoading = true
       pageCampaign(this.listQuery).then(response => {
-        const data = response.data
-        this.list = data.list
-        this.total = data.total
+        if (response) {
+          const data = response.data
+          this.list = data.list
+          this.total = data.total
 
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 100)
+          // Just to simulate the time of the request
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 100)
+        }
       })
     },
     // 查询网络联盟列表
     listNetwork() {
       listNetwork().then(response => {
-        this.networkList = response.data
+        if (response) {
+          this.networkList = response.data
+        }
       })
     },
     listTraffic() {
       listTraffic().then(response => {
-        this.trafficList = response.data
+        if (response) {
+          this.trafficList = response.data
+        }
       })
     },
     listOffer() {
       listOffer().then(response => {
-        this.offerList = response.data
+        if (response) {
+          this.offerList = response.data
+        }
       })
     },
     listTrafficToken() {
       const trafficId = this.temp.trafficId
       this.temp.tokens = []
       listByIdRefAndType(trafficId, 1).then(response => {
-        const datas = response.data
-        for (const i in datas) {
-          const data = datas[i]
-          this.temp.tokens.push({
-            name: data.name,
-            value: data.value,
-            id: data.id
-          })
+        if (response) {
+          const datas = response.data
+          for (const i in datas) {
+            const data = datas[i]
+            this.temp.tokens.push({
+              name: data.name,
+              value: data.value,
+              id: data.id
+            })
+          }
         }
       })
     },
     // 列出所有的指标
     listQuotas() {
       listAll().then(response => {
-        this.quotas = response.data
+        if (response) {
+          this.quotas = response.data
+        }
       })
     },
     sortChange(data) {
@@ -306,7 +318,7 @@ export default {
     createData() {
       const param = this.temp
       saveCampaign(param).then(response => {
-        if (response.code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '创建成功',
@@ -315,20 +327,13 @@ export default {
           })
           this.dialogFormVisible = false
           this.getList()
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '创建失败',
-            type: 'fail',
-            duration: 2000
-          })
         }
       })
     },
     updateData() {
       const param = this.temp
       updateCamapign(param.id, param).then(response => {
-        if (response.code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '更新成功',
@@ -337,13 +342,6 @@ export default {
           })
           this.dialogFormVisible = false
           this.getList()
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '更新失败',
-            type: 'fail',
-            duration: 2000
-          })
         }
       })
     },
@@ -353,37 +351,21 @@ export default {
       const id = row.id
       this.temp.id = id
       getCampaign(id).then(response => {
-        if (response.code === '1') {
+        if (response) {
           const data = response.data
           this.temp.name = data.name
           this.temp.costPerClick = data.costPerClick
           this.temp.trafficId = data.trafficId
           this.temp.offerId = data.offerId
           this.dialogFormVisible = true
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '查询campaign失败，请稍后重试',
-            type: 'fail',
-            duration: 2000
-          })
-          this.dialogFormVisible = false
         }
       })
       listByIdRefAndType(id, 0).then(response => {
-        if (response.code === '1') {
+        if (response) {
           if (response.data !== null) {
             this.temp.tokens = response.data
           }
           this.dialogFormVisible = true
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '查询token失败，请稍后重试',
-            type: 'fail',
-            duration: 2000
-          })
-          this.dialogFormVisible = false
         }
       })
     },
@@ -403,8 +385,7 @@ export default {
     },
     confirmDelete() {
       deleteCampaign(this.tempDeleteId).then(response => {
-        const code = response.code
-        if (code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '删除成功',

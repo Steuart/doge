@@ -1,11 +1,10 @@
 <template>
   <div class="login-container">
 
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+    <el-form ref="loginForm" :model="loginForm" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">{{ login.title }}</h3>
-        <lang-select class="set-language"/>
+        <h3 class="title">Tracker</h3>
       </div>
 
       <el-form-item prop="username">
@@ -14,8 +13,8 @@
         </span>
         <el-input
           v-model="loginForm.username"
-          :placeholder="login.username"
-          name="username"
+          :placeholder="'用户名'"
+          name="用户名"
           type="text"
           auto-complete="on"
         />
@@ -28,8 +27,8 @@
         <el-input
           :type="passwordType"
           v-model="loginForm.password"
-          :placeholder="login.password"
-          name="password"
+          :placeholder="'密码'"
+          name="密码"
           auto-complete="on"
           @keyup.enter.native="handleLogin" />
         <span class="show-pwd" @click="showPwd">
@@ -37,7 +36,7 @@
         </span>
       </el-form-item>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">{{ login.logIn }}</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
 
       <!--<div class="tips">
         <span>{{ $t('login.username') }} : admin</span>
@@ -53,36 +52,16 @@
 </template>
 
 <script>
-import { isvalidUsername } from '@/utils/validate'
-import LangSelect from '@/components/LangSelect'
-import SocialSign from './socialsignin'
+import { loginByUsername } from '@/api/login'
 
 export default {
   name: 'Login',
-  components: { LangSelect, SocialSign },
+  components: { },
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!isvalidUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
-      } else {
-        callback()
-      }
-    }
-    const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
-      } else {
-        callback()
-      }
-    }
     return {
       loginForm: {
         username: 'admin',
-        password: '1111111'
-      },
-      loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        password: '12345678'
       },
       passwordType: 'password',
       loading: false,
@@ -99,12 +78,6 @@ export default {
     }
 
   },
-  created() {
-    // window.addEventListener('hashchange', this.afterQRScan)
-  },
-  destroyed() {
-    // window.removeEventListener('hashchange', this.afterQRScan)
-  },
   methods: {
     showPwd() {
       if (this.passwordType === 'password') {
@@ -114,18 +87,14 @@ export default {
       }
     },
     handleLogin() {
-      this.$refs.loginForm.validate(valid => {
-        if (valid) {
-          this.loading = true
-          this.$store.dispatch('LoginByUsername', this.loginForm).then(() => {
-            this.loading = false
-            this.$router.push({ path: this.redirect || '/' })
-          }).catch(() => {
-            this.loading = false
-          })
-        } else {
-          console.log('error submit!!')
-          return false
+      const username = this.loginForm.username
+      const password = this.loginForm.password
+      loginByUsername(username, password).then(response => {
+        if (response) {
+          sessionStorage.setItem('token', response.data.token)
+          sessionStorage.setItem('user', response.data.user)
+          this.$store.dispatch('LoginByUsername')
+          this.$router.push('/')
         }
       })
     }

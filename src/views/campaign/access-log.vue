@@ -185,44 +185,53 @@ export default {
     getList() {
       this.listLoading = true
       pageCampaign(this.listQuery).then(response => {
-        const data = response.data
-        this.list = data.list
-        this.total = data.total
+        if (response) {
+          const data = response.data
+          this.list = data.list
+          this.total = data.total
 
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 200)
+          // Just to simulate the time of the request
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 200)
+        }
       })
     },
     listAllQuota() {
       listAll().then(response => {
-        this.quotas = response.data
-        for (const i in this.quotas) {
-          const children = this.quotas[i].children
-          for (const j in children) {
-            const quota = children[j]
-            this.quotasMap[quota.code] = quota.name
-            this.quotasArr.push(quota.code)
+        if (response) {
+          this.quotas = response.data
+          for (const i in this.quotas) {
+            const children = this.quotas[i].children
+            for (const j in children) {
+              const quota = children[j]
+              this.quotasMap[quota.code] = quota.name
+              this.quotasArr.push(quota.code)
+            }
           }
-          console.log(this.quotasMap)
         }
       })
     },
     // 查询网络联盟列表
     listNetwork() {
       listNetwork().then(response => {
-        this.networkList = response.data
+        if (response) {
+          this.networkList = response.data
+        }
       })
     },
     listTraffic() {
       listTraffic().then(response => {
-        this.trafficList = response.data
+        if (response) {
+          this.trafficList = response.data
+        }
       })
     },
     listOffer() {
       listOffer().then(response => {
-        this.offerList = response.data
+        if (response) {
+          this.offerList = response.data
+        }
       })
     },
     handleFilter() {

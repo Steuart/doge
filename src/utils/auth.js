@@ -1,9 +1,9 @@
 import Cookies from 'js-cookie'
 
-const TokenKey = 'Admin-Token'
+const TokenKey = 'security_token'
 
 export function getToken() {
-  return Cookies.get(TokenKey)
+  return sessionStorage.getItem('token')
 }
 
 export function setToken(token) {

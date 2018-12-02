@@ -193,19 +193,23 @@ export default {
     getList() {
       this.listLoading = true
       pageTraffic(this.listQuery).then(response => {
-        const data = response.data
-        this.items = data.list
-        this.total = data.total
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 150)
+        if (response) {
+          const data = response.data
+          this.items = data.list
+          this.total = data.total
+          // Just to simulate the time of the request
+          setTimeout(() => {
+            this.listLoading = false
+          }, 150)
+        }
       })
     },
     // 列出所有的指标
     listQuotas() {
       listAll().then(response => {
-        this.quotas = response.data
+        if (response) {
+          this.quotas = response.data
+        }
       })
     },
     handleFilter() {
@@ -265,7 +269,7 @@ export default {
     createData() {
       const param = this.temp
       saveTraffic(param).then(response => {
-        if (response.code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '创建成功',
@@ -274,13 +278,6 @@ export default {
           })
           this.dialogFormVisible = false
           this.getList()
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '创建失败',
-            type: 'fail',
-            duration: 2000
-          })
         }
       })
     },
@@ -290,44 +287,28 @@ export default {
       const id = row.id
       this.temp.id = id
       getTrafficById(id).then(response => {
-        if (response.code === '1') {
+        if (response) {
           const data = response.data
           this.temp.name = data.name
           this.temp.id = data.id
           this.temp.homePage = data.homePage
           this.temp.remark = data.remark
           this.dialogFormVisible = true
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '查询campaign失败，请稍后重试',
-            type: 'fail',
-            duration: 2000
-          })
-          this.dialogFormVisible = false
         }
       })
       listByIdRefAndType(id, 1).then(response => {
-        if (response.code === '1') {
+        if (response) {
           if (response.data !== null) {
             this.temp.tokens = response.data
           }
           this.dialogFormVisible = true
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '查询token失败，请稍后重试',
-            type: 'fail',
-            duration: 2000
-          })
-          this.dialogFormVisible = false
         }
       })
     },
     updateData() {
       const param = this.temp
       updateTraffic(param.id, param).then(response => {
-        if (response.code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '更新成功',
@@ -336,13 +317,6 @@ export default {
           })
           this.dialogFormVisible = false
           this.getList()
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '更新失败',
-            type: 'fail',
-            duration: 2000
-          })
         }
       })
     },
@@ -352,8 +326,7 @@ export default {
     },
     confirmDelete() {
       deleteTraffic(this.tempDeleteId).then(response => {
-        const code = response.code
-        if (code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '删除成功',

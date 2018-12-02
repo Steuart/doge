@@ -5,7 +5,7 @@ Vue.use(Router)
 
 /* Layout */
 import Layout from '@/views/layout/Layout'
-
+import store from '@/store'
 /* Router Modules */
 
 /** note: Submenu only appear when children.length>=1
@@ -27,6 +27,9 @@ import Layout from '@/views/layout/Layout'
   }
 **/
 export const constantRouterMap = [
+  { path: '*',
+    component: () => import('@/views/errorPage/404')
+  },
   {
     path: '/redirect',
     component: Layout,
@@ -40,6 +43,7 @@ export const constantRouterMap = [
   },
   {
     path: '/login',
+    name: 'login',
     component: () => import('@/views/login/index'),
     hidden: true
   },
@@ -169,8 +173,23 @@ export const constantRouterMap = [
   }
 ]
 
-export default new Router({
+const router = new Router({
   // mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRouterMap
 })
+
+// const whiteList = []
+router.beforeEach((to, from, next) => {
+  if (store.getters.token === 'undefined' || !store.getters.token) {
+    if (to.path === '/login') {
+      next()
+    } else {
+      next('/login')
+    }
+  } else {
+    next()
+  }
+})
+
+export default router

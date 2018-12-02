@@ -157,14 +157,16 @@ export default {
     getList() {
       this.listLoading = true
       pageNetwork(this.listQuery).then(response => {
-        const data = response.data
-        this.list = data.list
-        this.total = data.total
+        if (response) {
+          const data = response.data
+          this.list = data.list
+          this.total = data.total
 
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 150)
+          // Just to simulate the time of the request
+          setTimeout(() => {
+            this.listLoading = false
+          }, 150)
+        }
       })
     },
     handleFilter() {
@@ -210,7 +212,7 @@ export default {
     },
     createData() {
       saveNetwork(this.temp).then(response => {
-        if (response.code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '创建成功',
@@ -219,25 +221,20 @@ export default {
           })
           this.dialogFormVisible = false
           this.getList()
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '创建失败',
-            type: 'fail',
-            duration: 2000
-          })
         }
       })
     },
     handleUpdate(row) {
       const id = row.id
       getNetworkById(id).then(response => {
-        const data = response.data
-        this.temp = {
-          id: data.id,
-          name: data.name,
-          homePage: data.homePage,
-          remark: data.remark
+        if (response) {
+          const data = response.data
+          this.temp = {
+            id: data.id,
+            name: data.name,
+            homePage: data.homePage,
+            remark: data.remark
+          }
         }
       })
       this.dialogStatus = 'update'
@@ -248,7 +245,7 @@ export default {
     },
     updateData() {
       updateNetwork(this.temp.id, this.temp).then(response => {
-        if (response.code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '更新成功',
@@ -257,13 +254,6 @@ export default {
           })
           this.dialogFormVisible = false
           this.getList()
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '更新失败，请稍后重试',
-            type: 'fail',
-            duration: 2000
-          })
         }
       })
     },
@@ -273,7 +263,7 @@ export default {
     },
     confirmDelete() {
       deleteNetwork(this.tempDeleteId).then(response => {
-        if (response.code === '1') {
+        if (response) {
           this.$notify({
             title: '成功',
             message: '删除成功',
@@ -282,13 +272,6 @@ export default {
           })
           this.getList()
           this.deleteVisible = false
-        } else {
-          this.$notify({
-            title: '失败',
-            message: '删除失败，请稍后重试',
-            type: 'fail',
-            duration: 2000
-          })
         }
       })
     }

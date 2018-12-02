@@ -57,7 +57,12 @@ export default {
   },
   data() {
     return {
-      data: null
+      data: {
+        todayTransfer: 0,
+        todayEarnings: 0,
+        monthEarnings: 0,
+        totalEarnings: 0
+      }
     }
   },
   computed: {
@@ -68,7 +73,12 @@ export default {
   methods: {
     fetchData() {
       defaultTransferStatistic().then(response => {
-        this.data = response.data
+        if (response) {
+          this.data.todayTransfer = response.data.todayTransfer
+          this.data.todayEarnings = response.data.todayEarnings
+          this.data.monthEarnings = response.data.monthEarnings
+          this.data.totalEarnings = response.data.totalEarnings
+        }
       })
     },
     handleSetLineChartData(type) {
