@@ -174,6 +174,12 @@ export const constantRouterMap = [
         component: () => import('@/views/system/account-manage.vue'),
         name: 'account',
         meta: { title: '账号管理', noCache: true }
+      },
+      {
+        path: 'quota',
+        component: () => import('@/views/system/quota-manage.vue'),
+        name: 'quota',
+        meta: { title: '指标管理', noCache: true }
       }
     ]
   }
