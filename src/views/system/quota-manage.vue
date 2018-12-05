@@ -8,7 +8,7 @@
           <span class="content"> {{ quota.remark }}</span>
           <div class="operate" >
             <el-button size="mini" type="primary" icon="el-icon-edit" circle @click="handleUpdate(quota)"/>
-            <el-button size="mini" type="danger" icon="el-icon-delete" circle @click="handleDelete(quota)"/>
+            <el-button :disabled="quota.deleteAble === 1" size="mini" type="danger" icon="el-icon-delete" circle @click="handleDelete(quota)"/>
             <el-button size="mini" type="success" icon="el-icon-plus" circle @click="handleCreate(quota)"/>
           </div>
         </div>
@@ -19,7 +19,7 @@
                 <span>{{ child.name }}</span>
                 <div class="operate" >
                   <el-button size="mini" type="primary" icon="el-icon-edit" circle @click="handleUpdate(child)" />
-                  <el-button size="mini" type="danger" icon="el-icon-delete" circle @click="handleDelete(child)"/>
+                  <el-button :disabled="child.deleteAble === 1" size="mini" type="danger" icon="el-icon-delete" circle @click="handleDelete(child)"/>
                   <el-button size="mini" type="success" icon="el-icon-plus" circle @click="handleCreate(quota,child)"/>
                 </div>
               </div>
@@ -50,6 +50,12 @@
         </el-form-item>
         <el-form-item :label="'code'" prop="type">
           <el-input v-model="temp.code"/>
+        </el-form-item>
+        <el-form-item :label="'是否可删除'" prop="type">
+          <template>
+            <el-radio v-model="temp.deleteAble" :label="0">是</el-radio>
+            <el-radio v-model="temp.deleteAble" :label="1">否</el-radio>
+          </template>
         </el-form-item>
         <el-form-item :label="'简介'" prop="type">
           <el-input
@@ -107,6 +113,7 @@ export default {
         code: null,
         remark: null,
         groupId: null,
+        deleteAble: 1,
         beforeQuotaId: null
       },
       textMap: {
@@ -149,7 +156,8 @@ export default {
         code: null,
         remark: '',
         groupId: null,
-        beforeQuotaId: null
+        beforeQuotaId: null,
+        deleteAble: null
       }
     },
     handleUpdate(row) {

@@ -33,6 +33,10 @@
         value-format="yyyy-MM-dd HH:mm:ss"
         placeholder="结束日期"
         style="width: 150px"/>
+      <el-checkbox-group v-model="listQuery.status" class="filter-item">
+        <el-checkbox-button :label="1">已转化</el-checkbox-button>
+        <el-checkbox-button :label="0">未转化</el-checkbox-button>
+      </el-checkbox-group>
       <!--<el-input :placeholder="'名字'" v-model="listQuery.title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>-->
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" circle @click="handleFilter" />
     </div>
@@ -47,14 +51,24 @@
       style="width: 100%;"
       @sort-change="sortChange">
       <el-table-column :label="'编号'" type="index" align="center" />
+      <el-table-column :label="'状态'" prop="status" align="center" >
+        <template slot-scope="scope">
+          <el-tag
+            :type="scope.row.status === 0 ? 'primary' : 'success'"
+            disable-transitions>{{ scope.row.status === 0 ? '未转化' : '转化' }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column :label="'营销'" prop="campaignName" align="center" />
       <el-table-column :label="'任务'" prop="offerName" align="center" />
       <el-table-column :label="'流量'" prop="trafficName" align="center" />
       <el-table-column :label="'网络联盟'" prop="networkName" align="center" />
-      <el-table-column :label="'创建时间'" prop="dateCreate" sortable="custom" align="center" />
+      <el-table-column :label="'支出'" prop="payout" align="center" />
+      <el-table-column :label="'收入'" prop="earning" align="center" />
+      <el-table-column :label="'点击时间'" prop="dateCreate" sortable="custom" align="center" />
+      <el-table-column :label="'转化时间'" prop="transferDate" sortable="custom" align="center" />
       <el-table-column v-for="quotaCode in formThead" :key="quotaCode" :label="quotasMap[quotaCode]">
         <template slot-scope="scope">
-          {{ scope.row.content[quotaCode] }}
+          {{ scope.row.clickContent[quotaCode] }}
         </template>
       </el-table-column>
     </el-table>
@@ -138,6 +152,7 @@ export default {
         campaignId: null,
         createBeginDate: null,
         createEndDate: null,
+        status: [1, 0],
         sorts: [{
           'fieldName': 'dateUpdate',
           'sortType': 'desc'
