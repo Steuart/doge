@@ -57,6 +57,49 @@
         <el-form-item :label="'主页'" prop="type">
           <el-input v-model="temp.homePage"/>
         </el-form-item>
+
+        <div class="token">
+          <el-form-item v-for="(item, index) in temp.offerTokens" :key="item.id" :label="'p'+index">
+            <el-select v-model="item.name" style="width: 40%" placeholder="请选择">
+              <el-option-group
+                v-for="group in quotas"
+                :key="group.id"
+                :label="group.name">
+                <el-option
+                  v-for="child in group.children"
+                  :key="child.code"
+                  :label="child.name"
+                  :value="child.code" />
+              </el-option-group>
+            </el-select>
+            <el-input v-model="item.value"/>
+            <el-button style="display: inline;" @click="deleteToken('offerToken',index)">删除</el-button>
+          </el-form-item>
+        </div>
+        <el-form-item :label="'任务参数'">
+          <el-button round style="width: 100%" @click="addToken('offerToken')">+</el-button>
+        </el-form-item>
+        <div class="token">
+          <el-form-item v-for="(item, index) in temp.callbackTokens" :key="item.id" :label="'p'+index">
+            <el-select v-model="item.name" style="width: 40%" placeholder="请选择">
+              <el-option-group
+                v-for="group in quotas"
+                :key="group.id"
+                :label="group.name">
+                <el-option
+                  v-for="child in group.children"
+                  :key="child.code"
+                  :label="child.name"
+                  :value="child.code" />
+              </el-option-group>
+            </el-select>
+            <el-input v-model="item.value"/>
+            <el-button style="display: inline;" @click="deleteToken('callbackToken',index)">删除</el-button>
+          </el-form-item>
+        </div>
+        <el-form-item :label="'回调参数'">
+          <el-button round style="width: 100%" @click="addToken('callbackToken')">+</el-button>
+        </el-form-item>
         <el-form-item :label="'简介'" prop="type">
           <el-input
             v-model="temp.remark"
@@ -84,6 +127,7 @@
 
 <script>
 import { pageNetwork, saveNetwork, updateNetwork, deleteNetwork, getNetworkById } from '@/api/network'
+import { listAll } from '@/api/quota'
 import waves from '@/directive/waves' // Waves directive
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
@@ -138,8 +182,11 @@ export default {
         id: null,
         name: null,
         homePage: null,
-        remark: ''
+        remark: '',
+        offerTokens: [],
+        callbackTokens: []
       },
+      quotas: [],
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
@@ -152,8 +199,17 @@ export default {
   },
   created() {
     this.getList()
+    this.listQuotas()
   },
   methods: {
+    // 列出所有的指标
+    listQuotas() {
+      listAll().then(response => {
+        if (response) {
+          this.quotas = response.data
+        }
+      })
+    },
     getList() {
       this.listLoading = true
       pageNetwork(this.listQuery).then(response => {
@@ -199,7 +255,9 @@ export default {
         id: null,
         name: null,
         homePage: null,
-        remark: ''
+        remark: '',
+        offerTokens: [],
+        callbackTokens: []
       }
     },
     handleCreate() {
@@ -274,6 +332,28 @@ export default {
           this.deleteVisible = false
         }
       })
+    },
+    addToken(type) {
+      if (type === 'callbackToken') {
+        this.temp.callbackTokens.push({
+          name: null,
+          value: null,
+          id: null
+        })
+        return
+      }
+      this.temp.offerTokens.push({
+        name: null,
+        value: null,
+        id: null
+      })
+    },
+    deleteToken(type, index) {
+      if (type === 'callbackToken') {
+        this.temp.callbackTokens.splice(index, 1)
+        return
+      }
+      this.temp.offerTokens.splice(index, 1)
     }
   }
 }

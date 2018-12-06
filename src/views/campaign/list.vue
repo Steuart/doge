@@ -36,7 +36,7 @@
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange">
-      <el-table-column :label="'编号'" type="index" align="center" width="65" />
+      <el-table-column :label="'编号'" type="index" align="center" width="50" />
       <el-table-column :label="'名字'" align="center" width="150">
         <template slot-scope="scope">
           <router-link to="/campaign/detail">
@@ -45,15 +45,16 @@
         </template>
       </el-table-column>
       <el-table-column :label="'创建时间'" sortable="custom" property="dateCreate" width="170px" align="center" />
+      <el-table-column :label="'访问链接'" property="url" width="300px" />
       <el-table-column :label="'跳转链接'" property="redirectLink" />
-      <el-table-column :label="'转化'" sortable="custom" property="leads" width="110px" align="center" />
-      <el-table-column :label="'点击'" sortable="custom" property="clicks" width="110px" align="center" />
-      <el-table-column :label="'CPC(%)'" sortable="custom" property="costPerClick" width="110px" align="center" />
-      <el-table-column :label="'PPL(%)'" sortable="custom" property="payPerLead" align="center" width="110px" />
-      <el-table-column :label="'CVR(%)'" sortable="custom" property="payPerLead" class-name="status-col" width="110px" />
-      <el-table-column :label="'CPC(%)'" sortable="custom" property="costPerClick" class-name="status-col" width="110px" />
-      <el-table-column :label="'ROI(%)'" sortable="custom" property="clicks" class-name="status-col" width="110px" />
-      <el-table-column :label="'操作'" align="center" width="230" class-name="small-padding fixed-width">
+      <el-table-column :label="'转化'" sortable="custom" property="leads" width="120px" align="center" />
+      <el-table-column :label="'点击'" sortable="custom" property="clicks" width="120px" align="center" />
+      <el-table-column :label="'CPC(%)'" sortable="custom" property="costPerClick" width="60px" align="center" />
+      <el-table-column :label="'PPL(%)'" sortable="custom" property="payPerLead" align="center" width="60px" />
+      <el-table-column :label="'CVR(%)'" sortable="custom" property="payPerLead" class-name="status-col" width="60px" />
+      <el-table-column :label="'CPC(%)'" sortable="custom" property="costPerClick" class-name="status-col" width="60px" />
+      <el-table-column :label="'ROI(%)'" sortable="custom" property="clicks" class-name="status-col" width="60px" />
+      <el-table-column :label="'操作'" align="center" width="160" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ '编辑' }}</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ '删除' }}
@@ -105,7 +106,7 @@
             <el-button style="display: inline;" @click="deleteToken(index)">删除</el-button>
           </el-form-item>
         </div>
-        <el-form-item>
+        <el-form-item label="访问参数">
           <el-button round style="width: 100%" @click="addToken">+</el-button>
         </el-form-item>
       </el-form>
