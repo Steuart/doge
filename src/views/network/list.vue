@@ -283,6 +283,7 @@ export default {
       })
     },
     handleUpdate(row) {
+      this.resetTemp()
       const id = row.id
       getNetworkById(id).then(response => {
         if (response) {
@@ -291,7 +292,15 @@ export default {
             id: data.id,
             name: data.name,
             homePage: data.homePage,
-            remark: data.remark
+            remark: data.remark,
+            callbackTokens: [],
+            offerTokens: []
+          }
+          if (data.callbackTokens !== null) {
+            this.temp.callbackTokens = data.callbackTokens
+          }
+          if (data.offerTokens !== null) {
+            this.temp.offerTokens = data.offerTokens
           }
         }
       })
