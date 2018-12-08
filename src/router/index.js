@@ -48,6 +48,12 @@ export const constantRouterMap = [
     hidden: true
   },
   {
+    path: '/register',
+    name: '注册',
+    component: () => import('@/views/register/index'),
+    hidden: true
+  },
+  {
     path: '/auth-redirect',
     component: () => import('@/views/login/authredirect'),
     hidden: true
@@ -187,8 +193,10 @@ const router = new Router({
 
 // const whiteList = []
 router.beforeEach((to, from, next) => {
+  const exclude = ['/login', '/register', '/404', '/401']
+
   if (store.getters.token === 'undefined' || !store.getters.token) {
-    if (to.path === '/login') {
+    if (exclude.includes(to.path)) {
       next()
     } else {
       next('/login')

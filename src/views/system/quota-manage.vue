@@ -1,5 +1,9 @@
 <template>
   <div class="app-container">
+    <div v-show="quotas.length === 0" class="default" >
+      <h3>什么数据都没有?</h3>
+      <el-button type="primary" plain @click="handleCreate()">点我添加分组</el-button>
+    </div>
     <ul v-loading="listLoading">
       <li v-for="quota in quotas" :key="quota.id">
         <div class="group">
@@ -114,6 +118,7 @@ export default {
         remark: null,
         groupId: null,
         deleteAble: 1,
+        type: null,
         beforeQuotaId: null
       },
       textMap: {
@@ -157,7 +162,8 @@ export default {
         remark: '',
         groupId: null,
         beforeQuotaId: null,
-        deleteAble: null
+        deleteAble: null,
+        type: null
       }
     },
     handleUpdate(row) {
@@ -185,7 +191,9 @@ export default {
       this.resetTemp()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
-      this.temp.groupId = group.id
+      if (group) {
+        this.temp.groupId = group.id
+      }
       if (quota) {
         this.temp.beforeQuotaId = quota.id
         this.temp.type = 1
@@ -237,6 +245,9 @@ export default {
     color: #606266;
     ul li {
       list-style-type:none;
+    }
+    .default {
+      text-align: center;
     }
     .group{
       min-height: 50px;

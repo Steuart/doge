@@ -93,3 +93,15 @@ export function updateUserStatus(id, status) {
     }
   })
 }
+
+/**
+ * 注册用户
+ * @param user
+ */
+export function register(user) {
+  return request({
+    url: '/user/register',
+    method: 'post',
+    data: user
+  })
+}

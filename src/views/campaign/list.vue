@@ -46,7 +46,7 @@
       </el-table-column>
       <el-table-column :label="'创建时间'" sortable="custom" property="dateCreate" width="170px" align="center" />
       <el-table-column :label="'访问链接'" property="url" width="300px" />
-      <el-table-column :label="'跳转链接'" property="redirectLink" />
+      <el-table-column :label="'跳转链接'" property="redirectUrl" />
       <el-table-column :label="'转化'" sortable="custom" property="leads" width="120px" align="center" />
       <el-table-column :label="'点击'" sortable="custom" property="clicks" width="120px" align="center" />
       <el-table-column :label="'CPC(%)'" sortable="custom" property="costPerClick" width="60px" align="center" />
