@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <ul class="field-container">
-      <li v-for="quota in quotas" :key="quota.id">
+      <li v-for="quota in quotas" v-show="quota.children && quota.children.length !==0" :key="quota.id" >
         <h3>{{ quota.name }}</h3>
         <el-checkbox-group v-model="checkboxVal">
           <el-checkbox v-for="child in quota.children" :label="child.code" :key="child.code">{{ child.name }}</el-checkbox>

@@ -32,10 +32,8 @@
       @sort-change="sortChange">
       <el-table-column :label="'编号'" type="index" align="center" width="65" />
       <el-table-column :label="'名字'" prop="name" align="center" width="120" />
-      <el-table-column :label="'主页'" prop="homePage" width="200px" align="center" />
-      <el-table-column :label="'总收入'" prop="earnings" align="center" width="120" />
-      <el-table-column :label="'任务数'" prop="offerNumber" align="center" width="120" />
-      <el-table-column :label="'EPC'" prop="epc" align="center" width="120" />
+      <el-table-column :label="'回调链接'" prop="callbackUrl" width="400px" align="center" />
+      <el-table-column :label="'主页'" prop="homePage" width="300px" align="center" />
       <el-table-column :label="'简介'" prop="remark" />
       <el-table-column :label="'创建时间'" prop="dateCreate" sortable="customer" width="155px" align="center" />
       <el-table-column :label="'操作'" align="center" width="230" class-name="small-padding fixed-width">

@@ -41,7 +41,7 @@
           </router-link>
         </template>
       </el-table-column>
-      <el-table-column :label="'联盟'" width="150px" property="networkId" align="center" />
+      <el-table-column :label="'联盟'" width="150px" property="networkName" align="center" />
       <el-table-column :label="'URL'" property="url" />
       <el-table-column :label="'Payout'" sortable="custom" property="payout" width="110px" align="center" />
       <el-table-column :label="'简介'" property="remark" align="center" />

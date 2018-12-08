@@ -32,12 +32,9 @@
       @sort-change="sortChange">
       <el-table-column :label="'编号'" type="index" align="center" width="65" />
       <el-table-column :label="'名字'" prop="name" align="center" width="120" />
-      <el-table-column :label="'主页'" prop="homePage" align="center" width="200" />
+      <el-table-column :label="'主页'" prop="homePage" align="center" width="400" />
       <el-table-column :label="'备注'" prop="remark" align="center" />
       <el-table-column :label="'创建时间'" prop="dateCreate" sortable="custom" width="170px" align="center" />
-      <el-table-column :label="'总转化'" prop="leads" width="110px" align="center" />
-      <el-table-column :label="'总点击'" prop="clicks" width="110px" align="center" />
-      <el-table-column :label="'CPC(%)'" prop="CPC" width="80px" />
       <el-table-column :label="'操作'" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ '编辑' }}</el-button>

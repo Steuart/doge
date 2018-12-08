@@ -2,7 +2,7 @@
   <div class="app-container">
     <div v-show="quotas.length === 0" class="default" >
       <h3>什么数据都没有?</h3>
-      <el-button type="primary" plain @click="handleCreate()">点我添加分组</el-button>
+      <el-button :loading="initLoading" type="primary" plain @click="handleInit()">初始化</el-button>
     </div>
     <ul v-loading="listLoading">
       <li v-for="quota in quotas" :key="quota.id">
@@ -55,12 +55,6 @@
         <el-form-item :label="'code'" prop="type">
           <el-input v-model="temp.code"/>
         </el-form-item>
-        <el-form-item :label="'是否可删除'" prop="type">
-          <template>
-            <el-radio v-model="temp.deleteAble" :label="0">是</el-radio>
-            <el-radio v-model="temp.deleteAble" :label="1">否</el-radio>
-          </template>
-        </el-form-item>
         <el-form-item :label="'简介'" prop="type">
           <el-input
             v-model="temp.remark"
@@ -82,11 +76,19 @@
         <el-button type="primary" @click="confirmDelete()">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog :visible.sync="initVisible" title="确认初始化指标" width="30%">
+      <span>指标初始化后将被重置且不可恢复，确认初始化？</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="initVisible = false">取 消</el-button>
+        <el-button type="primary" @click="confirmInit()">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listAll, saveQuota, updateQuota, deleteQuota } from '@/api/quota'
+import { listAll, saveQuota, updateQuota, deleteQuota, initQuota } from '@/api/quota'
 import treeTable from '@/components/TreeTable'
 import waves from '@/directive/waves' // Waves directive
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -117,7 +119,6 @@ export default {
         code: null,
         remark: null,
         groupId: null,
-        deleteAble: 1,
         type: null,
         beforeQuotaId: null
       },
@@ -127,7 +128,9 @@ export default {
       },
       dialogStatus: null,
       deleteVisible: false,
-      deleteId: null
+      deleteId: null,
+      initVisible: false,
+      initLoading: false
     }
   },
   computed: {
@@ -162,7 +165,6 @@ export default {
         remark: '',
         groupId: null,
         beforeQuotaId: null,
-        deleteAble: null,
         type: null
       }
     },
@@ -234,6 +236,25 @@ export default {
         })
         this.deleteVisible = false
         this.getList()
+      })
+    },
+    handleInit() {
+      this.initVisible = true
+    },
+    confirmInit() {
+      this.initLoading = true
+      initQuota().then(response => {
+        if (response) {
+          this.$notify({
+            title: '成功',
+            message: '初始化成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.initVisible = false
+          this.initLoading = false
+          this.getList()
+        }
       })
     }
   }

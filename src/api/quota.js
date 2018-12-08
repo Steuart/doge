@@ -45,3 +45,13 @@ export function deleteQuota(id) {
     method: 'delete'
   })
 }
+
+/**
+ * 初始化指标
+ */
+export function initQuota() {
+  return request({
+    url: '/quota/init',
+    method: 'put'
+  })
+}
