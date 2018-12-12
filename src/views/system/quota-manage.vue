@@ -16,8 +16,13 @@
             <el-button size="mini" type="success" icon="el-icon-plus" circle @click="handleCreate(quota)"/>
           </div>
         </div>
-        <el-row :gutter="20">
-          <el-col v-for="child in quota.children" :key="child.id" :span="6">
+        <el-row :gutter="10">
+          <el-col v-show="!quota.children" :span="4">
+            <div class="box-card add-quota" @click="handleCreate(quota,1)">
+              <p>+</p>
+            </div>
+          </el-col>
+          <el-col v-for="child in quota.children" :key="child.id" :span="4">
             <el-card class="box-card" shadow="hover">
               <div slot="header" class="card-header">
                 <span>{{ child.name }}</span>
@@ -31,12 +36,12 @@
                 <li class="item">
                   <span>code</span>: {{ child.code }}
                 </li>
-                <li class="item">
+                <!--<li class="item">
                   <span>更新日期</span>: {{ child.dateUpdate }}
                 </li>
                 <li class="item">
                   <span>创建日期</span>: {{ child.dateCreate }}
-                </li>
+                </li>-->
                 <li class="item">
                   <span>备注：</span>{{ child.remark }}
                 </li>
@@ -197,7 +202,6 @@ export default {
         this.temp.groupId = group.id
       }
       if (quota) {
-        this.temp.beforeQuotaId = quota.id
         this.temp.type = 1
       } else {
         this.temp.type = 0
@@ -290,9 +294,20 @@ export default {
     }
     .el-col {
       margin-bottom: 10px;
+      .add-quota {
+        text-align: center;
+        p {
+          border:1px solid #ebeef5;
+          border-radius: 5px;
+          margin: 0;
+          font-size: 70px;
+          height: 200px;
+          line-height: 200px;
+        }
+      }
       .box-card {
         color: #606266;
-        min-height: 200px;
+        height: 200px;
         .operate {
           display: none;
           float: right;
@@ -306,6 +321,9 @@ export default {
         }
         .card-header:hover>.operate {
           display: inline-block;
+        }
+        .body {
+          font-size: 15px;
         }
         .item {
           margin-bottom: 10px;

@@ -2,9 +2,16 @@
   <div class="app-container">
     <ul class="field-container">
       <li v-for="quota in quotas" v-show="quota.children && quota.children.length !==0" :key="quota.id" >
-        <h3>{{ quota.name }}</h3>
+        <div class="option">
+          <p>{{ quota.name }}</p>
+          <el-checkbox :name="quota.code" class="select-all" @change="showSelectAll">全选</el-checkbox>
+        </div>
         <el-checkbox-group v-model="checkboxVal">
-          <el-checkbox v-for="child in quota.children" :label="child.code" :key="child.code">{{ child.name }}</el-checkbox>
+          <el-row>
+            <el-col v-for="child in quota.children" :key="child.code" :span="3" style="margin: 4px 0 0 0">
+              <el-checkbox :label="child.code">{{ child.name }}</el-checkbox>
+            </el-col>
+          </el-row>
         </el-checkbox-group>
       </li>
     </ul>
@@ -258,6 +265,10 @@ export default {
       if (prop === 'id') {
         this.sortByID(order)
       }
+    },
+    showSelectAll(status) {
+      console.log(this.name)
+      console.log(status)
     }
   }
 }
@@ -268,6 +279,16 @@ export default {
     .field-container {
       list-style-type:none;
       margin-bottom: 30px;
+      .option {
+        p {
+          font-weight: bold;
+          display: inline-block;
+        }
+        .select-all {
+          float: right;
+          display: inline-block;
+        }
+      }
       .el-checkbox-group {
         margin-left: 40px;
       }
