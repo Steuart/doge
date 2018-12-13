@@ -37,7 +37,7 @@
       style="width: 100%;"
       @sort-change="sortChange">
       <el-table-column :label="'编号'" type="index" align="center" width="50" />
-      <el-table-column :label="'名字'" align="center" width="100">
+      <el-table-column :label="'名字'" align="center" >
         <template slot-scope="scope">
           <router-link to="/campaign/detail">
             <el-tag>{{ scope.row.name }}</el-tag>
@@ -45,25 +45,16 @@
         </template>
       </el-table-column>
       <el-table-column :label="'创建时间'" sortable="custom" property="dateCreate" width="170px" align="center" />
-      <el-table-column :label="'访问链接'" width="300px" >
+      <el-table-column :label="'转化'" sortable="custom" property="leads" align="center" />
+      <el-table-column :label="'点击'" sortable="custom" property="clicks" align="center" />
+      <el-table-column :label="'总收入'" sortable="custom" property="earnings" align="center" />
+      <el-table-column :label="'总支出'" sortable="custom" property="payouts" align="center" />
+      <el-table-column :label="'PPL'" property="payPerLead" class-name="status-col" width="100px" />
+      <el-table-column :label="'CPC'" property="costPerClick" class-name="status-col" width="100px" />
+      <el-table-column :label="'ROI(%)'" property="roi" class-name="status-col" width="100px" />
+      <el-table-column :label="'操作'" align="center" width="260" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <a :href="scope.row.url" target="_blank">{{ scope.row.url }}</a>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'跳转链接'" >
-        <template slot-scope="scope">
-          <a :href="scope.row.redirectUrl" target="_blank" >{{ scope.row.redirectUrl }}</a>
-        </template>
-      </el-table-column>
-      <el-table-column :label="'转化'" sortable="custom" property="leads" width="120px" align="center" />
-      <el-table-column :label="'点击'" sortable="custom" property="clicks" width="120px" align="center" />
-      <el-table-column :label="'总收入'" sortable="custom" property="earnings" width="100px" align="center" />
-      <el-table-column :label="'总支出'" sortable="custom" property="payouts" align="center" width="100px" />
-      <el-table-column :label="'PPL'" sortable="custom" property="payPerLead" class-name="status-col" width="100px" />
-      <el-table-column :label="'CPC'" sortable="custom" property="costPerClick" class-name="status-col" width="100px" />
-      <el-table-column :label="'ROI(%)'" sortable="custom" property="roi" class-name="status-col" width="100px" />
-      <el-table-column :label="'操作'" align="center" width="160" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
+          <el-button type="primary" size="mini" @click="showLink(scope.row)">{{ '链接' }}</el-button>
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ '编辑' }}</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ '删除' }}
           </el-button>
@@ -78,11 +69,6 @@
         <el-form-item :label="'名字'" prop="title">
           <el-input v-model="temp.name"/>
         </el-form-item>
-        <!--<el-form-item :label="'类型'" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key"/>
-          </el-select>
-        </el-form-item>-->
         <el-form-item :label="'任务'" prop="type">
           <el-select v-model="temp.offerId" class="filter-item" placeholder="请选择">
             <el-option v-for="item in offerList" :key="item.id" :label="item.name" :value="item.id"/>
@@ -130,6 +116,24 @@
         <el-button type="primary" @click="confirmDelete()">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog :visible.sync="linkVisible" title="链接" width="30%" class="link-dialog">
+      <div class="assess">
+        <div class="title">
+          <span style="margin-top: 0">访问链接</span>
+          <el-button type="primary" size="mini" round @click="handleCopy(linkTmp.url, $event)">复制</el-button>
+        </div>
+        <code style="word-break:break-all;">{{ linkTmp.url }}</code>
+      </div>
+      <div class="redirect">
+        <div class="title">
+          <span style="margin-top: 0">跳转链接</span>
+          <el-button type="primary" size="mini" round @click="handleCopy(linkTmp.redirectUrl, $event)">复制</el-button>
+        </div>
+        <code style="word-break:break-all;">{{ linkTmp.redirectUrl }}</code>
+      </div>
+    </el-dialog>
+
     <el-tooltip placement="top" content="返回顶部">
       <back-to-top :visibility-height="300" :back-position="50" transition-name="fade"/>
     </el-tooltip>
@@ -146,6 +150,8 @@ import { listAll } from '@/api/quota'
 import waves from '@/directive/waves' // Waves directive
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import BackToTop from '@/components/BackToTop'
+import clip from '@/utils/clipboard' // use clipboard directly
+
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
   { key: 'US', display_name: 'USA' },
@@ -217,7 +223,12 @@ export default {
       downloadLoading: false,
       beginDate: '',
       endDate: '',
-      quotas: []
+      quotas: [],
+      linkVisible: false,
+      linkTmp: {
+        url: '',
+        redirectUrl: ''
+      }
     }
   },
   created() {
@@ -405,6 +416,14 @@ export default {
           this.getList()
         }
       })
+    },
+    showLink(data) {
+      this.linkVisible = true
+      this.linkTmp.url = data.url
+      this.linkTmp.redirectUrl = data.redirectUrl
+    },
+    handleCopy(text, event) {
+      clip(text, event)
     }
   }
 }
@@ -414,6 +433,18 @@ export default {
   .app-container {
     a {
       color: #33C1FF;
+    }
+    .link-dialog {
+      .title {
+        margin-bottom: 10px;
+        span {
+          font-size: 18px;
+          font-weight: bold;
+        }
+        .el-button {
+          margin-left: 10px;
+        }
+      }
     }
     .edit-dialog {
       .el-input{
