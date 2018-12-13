@@ -276,6 +276,10 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss" scoped>
   .app-container {
+    ul {
+      margin-left: 0;
+      padding: 0;
+    }
     .field-container {
       list-style-type:none;
       margin-bottom: 30px;
