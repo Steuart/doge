@@ -4,7 +4,7 @@
       <li v-for="quota in quotas" v-show="quota.children && quota.children.length !==0" :key="quota.id" >
         <div class="option">
           <p>{{ quota.name }}</p>
-          <el-checkbox :name="quota.code" class="select-all" @change="showSelectAll">全选</el-checkbox>
+          <el-checkbox :name="quota.code" class="select-all" @change="showSelectAll($event,quota)">全选</el-checkbox>
         </div>
         <el-checkbox-group v-model="checkboxVal">
           <el-row>
@@ -266,9 +266,17 @@ export default {
         this.sortByID(order)
       }
     },
-    showSelectAll(status) {
-      console.log(this.name)
-      console.log(status)
+    showSelectAll(status, quota) {
+      const child = quota.children
+      const aSet = []
+      for (const i in child) {
+        aSet.push(child[i].code)
+      }
+      if (status) {
+        this.checkboxVal = Array.from(new Set(aSet.concat(this.checkboxVal)))
+      } else {
+        this.checkboxVal = this.checkboxVal.filter(v => aSet.indexOf(v) === -1)
+      }
     }
   }
 }
