@@ -110,6 +110,14 @@ export const constantRouterMap = [
         name: 'detail',
         hidden: true,
         meta: { title: '任务详情', noCache: true }
+      },
+      {
+        path: '/campaign/edit',
+        component: () => import('@/views/campaign/edit.vue'),
+        alwaysShow: false,
+        name: 'edit',
+        hidden: true,
+        meta: { title: '编辑任务', noCache: true }
       }
     ]
   },

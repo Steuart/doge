@@ -24,7 +24,9 @@
         style="width: 150px"/>
       <el-input :placeholder="'名字'" v-model="listQuery.name" style="width: 200px;" class="filter-item" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" circle @click="getList" />
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">新增</el-button>
+      <router-link to="/campaign/edit">
+        <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus">新增</el-button>
+      </router-link>
     </div>
 
     <el-table
@@ -55,7 +57,9 @@
       <el-table-column :label="'操作'" align="center" width="260" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="showLink(scope.row)">{{ '链接' }}</el-button>
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ '编辑' }}</el-button>
+          <router-link to="/campaign/edit">
+            <el-button type="primary" size="mini">{{ '编辑' }}</el-button>
+          </router-link>
           <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ '删除' }}
           </el-button>
         </template>
